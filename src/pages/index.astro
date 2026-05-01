@@ -11,212 +11,222 @@
 		<title>VHS Studio - Jaquette imprimable</title>
 	</head>
 	<body>
-		<div class="noise"></div>
-		<div class="app-shell">
+		<div class="app">
 			<header class="topbar">
-				<div>
-					<p class="kicker">Contre-Fictions / BosKop 2026</p>
-					<h1>VHS Studio</h1>
+				<div class="brand" aria-label="VHS Studio">
+					<span class="brand__logo">VHS STUDIO</span>
+					<span class="brand__sub">REC ●</span>
 				</div>
-				<div class="actions">
-					<button class="ghost" id="saveProject" type="button">Sauver</button>
-					<label class="ghost file-action">
-						Charger
-						<input id="loadProject" type="file" accept="application/json" />
-					</label>
-					<button class="primary" id="exportPng" type="button">PNG 300 dpi</button>
-					<button class="primary hot" id="exportPdf" type="button">PDF print</button>
+				<div class="topbar__festival">
+					<small>Concours 2026</small>
+					<strong>CONTRE-FICTIONS · BOSKOP · LES INTERGALACTIQUES</strong>
 				</div>
+				<div class="topbar__spacer"></div>
+				<button class="topbar__action topbar__action--secondary" id="saveProject" type="button">Sauver</button>
+				<label class="topbar__action topbar__action--secondary file-action">
+					Charger
+					<input id="loadProject" type="file" accept="application/json" />
+				</label>
+				<label class="topbar__action topbar__action--secondary guide-toggle">
+					<input id="toggleGuides" type="checkbox" checked />
+					Repères
+				</label>
+				<button class="topbar__action" id="exportPng" type="button">↓ PNG</button>
+				<button class="topbar__action topbar__action--primary" id="exportPdf" type="button">↓ PDF impression</button>
 			</header>
 
-			<main class="workspace">
-				<aside class="panel tools-panel" aria-label="Outils de jaquette">
-					<section>
-						<div class="panel-title">
-							<span>Placement</span>
-							<small>258 x 194 mm</small>
-						</div>
-						<div class="segment" role="group" aria-label="Zone cible">
-							<button class="active" data-zone="front" type="button">Recto</button>
-							<button data-zone="back" type="button">Verso</button>
-							<button data-zone="spine" type="button">Tranche</button>
-						</div>
-					</section>
-
-					<section>
-						<div class="panel-title">
-							<span>Ajouter</span>
-							<small id="assetCount"></small>
-						</div>
-						<div class="tool-grid">
-							<button id="addTitle" type="button">Titre</button>
-							<button id="addText" type="button">Texte</button>
-							<button id="addBox" type="button">Bloc</button>
-							<label class="upload-button">
-								Image
-								<input id="imageUpload" type="file" accept="image/*" multiple />
-							</label>
-						</div>
-					</section>
-
-					<section>
-						<div class="panel-title">
-							<span>Ambiances</span>
-						</div>
-						<div class="theme-grid">
-							<button data-theme="neon" type="button">Neon</button>
-							<button data-theme="noir" type="button">Noir</button>
-							<button data-theme="cosmic" type="button">Cosmic</button>
-							<button data-theme="rental" type="button">Rental</button>
-						</div>
-					</section>
-
-					<section>
-						<div class="panel-title">
-							<span>Logos</span>
-							<small>glisser-déposer</small>
-						</div>
-						<div class="asset-tray" id="assetTray" aria-label="Bibliothèque de logos"></div>
-					</section>
-				</aside>
-
-				<section class="stage-wrap" aria-label="Zone de création">
-					<div class="stage-toolbar">
-						<div class="measure-strip">
-							<span>Verso 114 mm</span>
-							<span>Tranche 30 mm</span>
-							<span>Recto 114 mm</span>
-						</div>
-						<div class="compact-actions">
-							<button id="fitZoom" type="button">Fit</button>
-							<label class="guide-toggle">
-								<input id="toggleGuides" type="checkbox" checked />
-								Guides
-							</label>
-						</div>
+			<aside class="rail rail--left" aria-label="Outils de jaquette">
+				<div class="section">
+					<div class="section__head"><span class="section__dot"></span><span class="section__title">Thème</span></div>
+					<div class="themes">
+						<button class="theme" data-theme="neon" data-active="true" type="button">
+							<span class="theme__preview theme__preview--neon"></span>
+							<span class="theme__label">NÉON</span>
+						</button>
+						<button class="theme" data-theme="rental" type="button">
+							<span class="theme__preview theme__preview--rental"></span>
+							<span class="theme__label">VIDÉOCLUB</span>
+						</button>
+						<button class="theme" data-theme="scifi" type="button">
+							<span class="theme__preview theme__preview--scifi"></span>
+							<span class="theme__label">SCI-FI</span>
+						</button>
+						<button class="theme" data-theme="horror" type="button">
+							<span class="theme__preview theme__preview--horror"></span>
+							<span class="theme__label">HORREUR</span>
+						</button>
 					</div>
-					<div class="stage-scroller" id="stageScroller">
-						<div class="stage" id="dropStage">
-							<canvas id="coverCanvas" aria-label="Prévisualisation de la jaquette VHS"></canvas>
-						</div>
+				</div>
+
+				<div class="section">
+					<div class="section__head"><span class="section__dot"></span><span class="section__title">Mise en page</span></div>
+					<div class="layouts">
+						<button class="layout" data-layout="classic" data-active="true" type="button">
+							<span class="layout__preview layout__preview--classic"></span>
+							<span class="layout__name">Classique</span>
+						</button>
+						<button class="layout" data-layout="bigtype" type="button">
+							<span class="layout__preview layout__preview--bigtype"></span>
+							<span class="layout__name">Gros titre</span>
+						</button>
+						<button class="layout" data-layout="poster" type="button">
+							<span class="layout__preview layout__preview--poster"></span>
+							<span class="layout__name">Affiche</span>
+						</button>
+						<button class="layout" data-layout="split" type="button">
+							<span class="layout__preview layout__preview--split"></span>
+							<span class="layout__name">Split</span>
+						</button>
 					</div>
-					<div class="statusbar" id="statusbar">
-						<span>Sélectionne un élément : déplacer au doigt/souris, poignées pour redimensionner, pastille jaune pour tourner.</span>
-						<span>Double-clic sur la jaquette : ajouter un texte.</span>
+				</div>
+
+				<div class="section">
+					<div class="section__head"><span class="section__dot"></span><span class="section__title">Placement</span></div>
+					<div class="segment" role="group" aria-label="Zone cible">
+						<button class="active" data-zone="front" type="button">Recto</button>
+						<button data-zone="back" type="button">Verso</button>
+						<button data-zone="spine" type="button">Tranche</button>
 					</div>
-				</section>
+				</div>
 
-				<aside class="panel inspector-panel" aria-label="Inspecteur">
-					<section>
-						<div class="panel-title">
-							<span>Calque</span>
-							<small id="selectedLabel">aucun</small>
-						</div>
-						<div class="layer-actions">
-							<button id="bringForward" type="button">Monter</button>
-							<button id="sendBackward" type="button">Descendre</button>
-							<button id="duplicateLayer" type="button">Dupliquer</button>
-							<button id="deleteLayer" class="danger" type="button">Supprimer</button>
-						</div>
-					</section>
+				<div class="section">
+					<div class="section__head"><span class="section__dot"></span><span class="section__title">Affiche</span></div>
+					<label class="btn btn--neon upload-button">
+						↥ Importer une image
+						<input id="imageUpload" type="file" accept="image/*" multiple />
+					</label>
+					<div class="tool-grid">
+						<button class="btn btn--ghost" id="addTitle" type="button">+ Titre</button>
+						<button class="btn btn--ghost" id="addText" type="button">+ Texte</button>
+						<button class="btn btn--ghost" id="addBox" type="button">+ Bloc</button>
+						<button class="btn btn--ghost" id="fitZoom" type="button">Ajuster</button>
+					</div>
+				</div>
 
-					<section class="inspector" id="inspector">
-						<label>
-							Texte
-							<textarea id="textContent" rows="4"></textarea>
-						</label>
-						<div class="split">
-							<label>
-								Police
-								<select id="fontFamily">
-									<optgroup label="Kit BosKop / local">
-										<option value="SF Movie Poster Condensed, Impact, sans-serif">SF Movie Poster Condensed</option>
-										<option value="SF Movie Poster, Impact, sans-serif">SF Movie Poster</option>
-										<option value="Bee Two, Georgia, serif">Bee Two</option>
-									</optgroup>
-									<optgroup label="Titres VHS / SF">
-										<option value="Michroma, Eurostile, sans-serif">Michroma - Eurostile vibe</option>
-										<option value="Orbitron, Eurostile, sans-serif">Orbitron - space tech</option>
-										<option value="Audiowide, Eurostile, sans-serif">Audiowide - video club</option>
-										<option value="Bungee, Impact, sans-serif">Bungee - gros titre</option>
-										<option value="Bungee Inline, Impact, sans-serif">Bungee Inline - néon</option>
-										<option value="Monoton, Impact, sans-serif">Monoton - enseigne VHS</option>
-										<option value="Creepster, Georgia, serif">Creepster - horreur</option>
-										<option value="Bebas Neue, Impact, sans-serif">Bebas Neue - affiche</option>
-										<option value="Anton, Impact, sans-serif">Anton - action</option>
-									</optgroup>
-									<optgroup label="Textes / crédits">
-										<option value="Roboto Condensed, Arial Narrow, sans-serif">Roboto Condensed</option>
-										<option value="Oswald, Arial Narrow, sans-serif">Oswald</option>
-										<option value="Archivo Black, Arial Black, sans-serif">Archivo Black</option>
-										<option value="Special Elite, Courier New, monospace">Special Elite</option>
-										<option value="Courier Prime, Courier New, monospace">Courier Prime</option>
-										<option value="Georgia, serif">Georgia</option>
-										<option value="Arial, sans-serif">Arial</option>
-									</optgroup>
-								</select>
-							</label>
-							<label>
-								Taille
-								<input id="fontSize" type="range" min="2" max="28" step="0.5" />
-							</label>
-						</div>
-						<div class="split">
-							<label>
-								Couleur
-								<input id="fillColor" type="color" />
-							</label>
-							<label>
-								Opacité
-								<input id="opacity" type="range" min="0.1" max="1" step="0.05" />
-							</label>
-						</div>
-						<div class="split">
-							<label>
-								Rotation
-								<input id="rotation" type="range" min="-180" max="180" step="1" />
-							</label>
-							<label>
-								Alignement
-								<select id="textAlign">
-									<option value="left">Gauche</option>
-									<option value="center">Centre</option>
-									<option value="right">Droite</option>
-								</select>
-							</label>
-						</div>
-						<div class="split image-controls">
-							<label>
-								Image
-								<select id="imageFit">
-									<option value="contain">Tout voir</option>
-									<option value="cover">Remplir</option>
-								</select>
-							</label>
-							<button id="replaceImage" type="button">Remplacer</button>
-						</div>
-						<div class="position-grid">
-							<label>X <input id="posX" type="number" step="1" /></label>
-							<label>Y <input id="posY" type="number" step="1" /></label>
-							<label>L <input id="posW" type="number" step="1" /></label>
-							<label>H <input id="posH" type="number" step="1" /></label>
-						</div>
-						<input id="replaceImageInput" type="file" accept="image/*" hidden />
-					</section>
+				<div class="section">
+					<div class="section__head"><span class="section__dot"></span><span class="section__title">Classification</span></div>
+					<div class="asset-tray asset-tray--compact" id="assetTray" aria-label="Bibliothèque de logos"></div>
+					<small class="asset-count" id="assetCount"></small>
+				</div>
+			</aside>
 
-					<section>
-						<div class="panel-title">
-							<span>Export</span>
-						</div>
-						<div class="print-spec">
-							<div><strong>Jaquette</strong><span>258 x 194 mm</span></div>
-							<div><strong>Recto</strong><span>114 x 194 mm</span></div>
-							<div><strong>Verso</strong><span>114 x 194 mm</span></div>
-							<div><strong>Tranche</strong><span>30 x 194 mm</span></div>
-						</div>
-					</section>
-				</aside>
+			<main class="stage-shell" aria-label="Zone de création">
+				<div class="stage__hint">Cliquez un élément pour l'éditer · glissez les coins pour redimensionner · double-clic pour ajouter du texte</div>
+				<div class="stage-scroller" id="stageScroller">
+					<div class="canvas-stage" id="dropStage">
+						<canvas id="coverCanvas" aria-label="Prévisualisation de la jaquette VHS"></canvas>
+					</div>
+				</div>
+				<div class="statusbar" id="statusbar">
+					<span>Sélectionne un élément : déplacer au doigt/souris, poignées pour redimensionner, pastille jaune pour tourner.</span>
+					<span>258 x 194 mm · verso 114 mm · tranche 30 mm · recto 114 mm</span>
+				</div>
 			</main>
+
+			<aside class="rail rail--right" aria-label="Inspecteur">
+				<div class="section">
+					<div class="section__head"><span class="section__dot"></span><span class="section__title">Inspecteur</span></div>
+					<div class="selected-row">
+						<span>Calque</span>
+						<strong id="selectedLabel">aucun</strong>
+					</div>
+					<div class="layer-actions">
+						<button class="btn" id="bringForward" type="button">▲ Monter</button>
+						<button class="btn" id="sendBackward" type="button">▼ Descendre</button>
+						<button class="btn" id="duplicateLayer" type="button">⎘ Dupliquer</button>
+						<button class="btn btn--danger" id="deleteLayer" type="button">✕ Supprimer</button>
+					</div>
+				</div>
+
+				<div class="section inspector" id="inspector">
+					<div class="field">
+						<label class="label" for="textContent">Contenu</label>
+						<textarea class="textarea" id="textContent" rows="4"></textarea>
+					</div>
+					<div class="field">
+						<label class="label" for="fontFamily">Police</label>
+						<select class="input" id="fontFamily">
+							<optgroup label="Kit BosKop / local">
+								<option value="SF Movie Poster Condensed, Impact, sans-serif">SF Movie Poster Condensed</option>
+								<option value="SF Movie Poster, Impact, sans-serif">SF Movie Poster</option>
+								<option value="Bee Two, Georgia, serif">Bee Two</option>
+							</optgroup>
+							<optgroup label="Titres VHS / SF">
+								<option value="Michroma, Eurostile, sans-serif">Michroma</option>
+								<option value="Orbitron, Eurostile, sans-serif">Orbitron</option>
+								<option value="Audiowide, Eurostile, sans-serif">Audiowide</option>
+								<option value="Bungee Shade, Impact, sans-serif">Bungee Shade</option>
+								<option value="Bungee, Impact, sans-serif">Bungee</option>
+								<option value="Monoton, Impact, sans-serif">Monoton</option>
+								<option value="Creepster, Georgia, serif">Creepster</option>
+								<option value="Anton, Impact, sans-serif">Anton</option>
+							</optgroup>
+							<optgroup label="Textes / crédits">
+								<option value="VT323, Courier New, monospace">VT323</option>
+								<option value="Roboto Condensed, Arial Narrow, sans-serif">Roboto Condensed</option>
+								<option value="Oswald, Arial Narrow, sans-serif">Oswald</option>
+								<option value="Special Elite, Courier New, monospace">Special Elite</option>
+								<option value="Courier Prime, Courier New, monospace">Courier Prime</option>
+								<option value="Georgia, serif">Georgia</option>
+								<option value="Arial, sans-serif">Arial</option>
+							</optgroup>
+						</select>
+					</div>
+					<div class="slider-row">
+						<label for="fontSize">Taille</label>
+						<input id="fontSize" type="range" min="2" max="34" step="0.5" />
+					</div>
+					<div class="split">
+						<div class="field">
+							<label class="label" for="fillColor">Couleur</label>
+							<input id="fillColor" type="color" />
+						</div>
+						<div class="field">
+							<label class="label" for="opacity">Opacité</label>
+							<input id="opacity" type="range" min="0.1" max="1" step="0.05" />
+						</div>
+					</div>
+					<div class="slider-row">
+						<label for="rotation">Rotation</label>
+						<input id="rotation" type="range" min="-180" max="180" step="1" />
+					</div>
+					<div class="split">
+						<div class="field">
+							<label class="label" for="textAlign">Alignement</label>
+							<select class="input" id="textAlign">
+								<option value="left">Gauche</option>
+								<option value="center">Centre</option>
+								<option value="right">Droite</option>
+							</select>
+						</div>
+						<div class="field image-controls">
+							<label class="label" for="imageFit">Image</label>
+							<select class="input" id="imageFit">
+								<option value="contain">Tout voir</option>
+								<option value="cover">Remplir</option>
+							</select>
+						</div>
+					</div>
+					<button class="btn btn--ghost image-controls" id="replaceImage" type="button">↥ Remplacer l'image</button>
+					<div class="position-grid">
+						<label>X <input id="posX" type="number" step="1" /></label>
+						<label>Y <input id="posY" type="number" step="1" /></label>
+						<label>L <input id="posW" type="number" step="1" /></label>
+						<label>H <input id="posH" type="number" step="1" /></label>
+					</div>
+					<input id="replaceImageInput" type="file" accept="image/*" hidden />
+				</div>
+
+				<div class="section">
+					<div class="section__head"><span class="section__dot"></span><span class="section__title">Impression</span></div>
+					<div class="print-spec">
+						<div><strong>Jaquette</strong><span>258 x 194 mm</span></div>
+						<div><strong>Recto</strong><span>114 x 194 mm</span></div>
+						<div><strong>Verso</strong><span>114 x 194 mm</span></div>
+						<div><strong>Tranche</strong><span>30 x 194 mm</span></div>
+					</div>
+				</div>
+			</aside>
 		</div>
 	</body>
 </html>
@@ -249,7 +259,62 @@
 		{ label: "-12", src: "/Logos%20Interdictions%20Ages/Interdit-12ans.png" },
 		{ label: "-16", src: "/Logos%20Interdictions%20Ages/Interdit-16ans.png" },
 		{ label: "Accord parental", src: "/Logos%20Interdictions%20Ages/Accord%20Parental.png" },
+		{ label: "Interdit location", src: "/Logos%20Interdictions%20Ages/Interdit%20a%CC%80%20la%20location.png" },
 	];
+
+	const THEMES = {
+		neon: {
+			back: "#16052d",
+			spine: "#b71776",
+			front: "#4a0a6e",
+			accent: "#1bf0ff",
+			secondary: "#ff2dd4",
+			title: "#fffbe9",
+			body: "#ffeacc",
+			shadow: "#ff2dd4",
+			titleFont: "Audiowide, SF Movie Poster Condensed, Impact, sans-serif",
+			bodyFont: "VT323, Courier New, monospace",
+		},
+		rental: {
+			back: "#f4e3b6",
+			spine: "#d23218",
+			front: "#e6c98a",
+			accent: "#d23218",
+			secondary: "#0e5740",
+			title: "#1a0a00",
+			body: "#2a1a0a",
+			shadow: "#fff4d6",
+			titleFont: "Bungee Shade, SF Movie Poster Condensed, Impact, sans-serif",
+			bodyFont: "Courier Prime, Courier New, monospace",
+		},
+		scifi: {
+			back: "#0a1238",
+			spine: "#5e1a78",
+			front: "#2c1a6e",
+			accent: "#ffd84a",
+			secondary: "#7adfff",
+			title: "#fff4d6",
+			body: "#d8e2f6",
+			shadow: "#ff7a3a",
+			titleFont: "Monoton, SF Movie Poster, Impact, sans-serif",
+			bodyFont: "VT323, Courier New, monospace",
+		},
+		horror: {
+			back: "#1c0506",
+			spine: "#5a0a05",
+			front: "#0a0102",
+			accent: "#e8c860",
+			secondary: "#c8141a",
+			title: "#ff1a18",
+			body: "#e8d4a8",
+			shadow: "#000000",
+			titleFont: "Creepster, Bungee Shade, Impact, sans-serif",
+			bodyFont: "Special Elite, Courier New, monospace",
+		},
+	};
+
+	let activeTheme = "neon";
+	let activeLayout = "classic";
 
 	const canvas = document.querySelector("#coverCanvas");
 	const ctx = canvas.getContext("2d");
@@ -300,21 +365,25 @@
 
 	const project = {
 		name: "contre-fictions-vhs",
-		background: "#0a0612",
+		background: "#16052d",
 		objects: [
-			rect("Fond verso", 0, 0, 114, 194, "#050506", true),
-			rect("Fond tranche", 114, 0, 30, 194, "#17394d", true),
-			rect("Fond recto", 144, 0, 114, 194, "#7895bd", true),
-			rect("Liseré magenta", 151, 8, 100, 5, "#ff2dd4"),
-			rect("Bande cyan", 151, 14, 100, 3, "#21f7ff"),
-			text("Titre", "NEON\nSATURNE", 153, 28, 96, 44, 17, "#fff7ad", "center", "Bungee, Impact, sans-serif"),
-			text("Accroche", "Un faux film de science-fiction\npour une vraie VHS-thèque.", 154, 68, 94, 18, 5, "#101020", "center", "Roboto Condensed, Arial Narrow, sans-serif"),
-			text("Verso synopsis", "SYNOPSIS\nEn 1986, une station orbitale capte un signal pirate venu d'une cassette impossible. Une équipe de techniciennes rembobine le futur avant que la Terre ne passe en mode neige.", 10, 20, 94, 60, 5.4, "#f9f5ff", "left", "Roboto Condensed, Arial Narrow, sans-serif"),
-			rect("Photo A", 10, 88, 42, 30, "#203c6d"),
-			rect("Photo B", 62, 88, 42, 30, "#7b245f"),
-			text("Critique", "\"Le choc cosmique de l'année.\" - VHS 3000", 10, 127, 94, 18, 5, "#ffec62", "center", "Georgia, serif"),
-			text("Crédits", "AVEC NOVA STERLING  KIM VECTOR  REALISATION M. LUMIERE  MUSIQUE SYNTH WAVE  DUREE 1H34", 10, 168, 94, 14, 3.3, "#ffffff", "center", "SF Movie Poster Condensed, Impact, sans-serif"),
-			text("Tranche", "NEON SATURNE", 54, 89.5, 150, 15, 8.5, "#ffffff", "center", "Michroma, Eurostile, sans-serif", -90),
+			rect("Fond verso", 0, 0, 114, 194, "#16052d", true),
+			rect("Fond tranche", 114, 0, 30, 194, "#b71776", true),
+			rect("Fond recto", 144, 0, 114, 194, "#4a0a6e", true),
+			rect("Halo soleil", 165, 34, 72, 58, "#ff7a3a"),
+			rect("Horizon VHS", 144, 132, 114, 62, "#120327"),
+			rect("Liseré magenta", 151, 10, 100, 4, "#ff2dd4"),
+			rect("Bande cyan", 151, 16, 100, 2.5, "#1bf0ff"),
+			text("Titre", "TITRE\nDU FILM", 150, 132, 102, 30, 18, "#fffbe9", "center", "Audiowide, SF Movie Poster Condensed, Impact, sans-serif"),
+			text("Accroche", "UNE NUIT, TOUT BASCULE", 154, 165, 94, 7, 4, "#1bf0ff", "center", "VT323, Courier New, monospace"),
+			text("Réalisateur", "UN FILM DE  PRÉNOM NOM", 154, 179, 94, 6, 3.3, "#ffeacc", "center", "SF Movie Poster Condensed, Impact, sans-serif"),
+			text("Synopsis titre", "SYNOPSIS", 8, 13, 94, 12, 7, "#1bf0ff", "left", "Audiowide, SF Movie Poster Condensed, Impact, sans-serif"),
+			text("Verso synopsis", "Dans une métropole rongée par les pluies acides, une archiviste découvre une cassette qui ne devrait pas exister. Plus elle la regarde, plus la réalité se brouille.\n\nLe festival CONTRE-FICTIONS vous invite à imaginer le film qui se cache sur cette bande magnétique.", 8, 29, 94, 55, 4.3, "#ffeacc", "left", "VT323, Courier New, monospace"),
+			rect("Photogramme A", 8, 91, 44, 30, "#2c1a6e"),
+			rect("Photogramme B", 62, 91, 44, 30, "#ff2dd4"),
+			text("Critique", "\"Le choc magnétique de l'année.\" - VHS 3000", 8, 131, 98, 14, 4.5, "#ffd84a", "center", "Georgia, serif"),
+			text("Crédits", "CONTRE-FICTIONS · BOSKOP · 2026 · COULEUR · STEREO · DUREE 96 MIN · © LES INTERGALACTIQUES", 8, 171, 98, 12, 3, "#ffffff", "center", "SF Movie Poster Condensed, Impact, sans-serif"),
+			text("Tranche", "TITRE DU FILM", 54, 89.5, 150, 15, 8.5, "#ffe357", "center", "Audiowide, SF Movie Poster Condensed, Impact, sans-serif", -90),
 		],
 	};
 
@@ -327,7 +396,7 @@
 	}
 
 	function text(name, content, x, y, w, h, fontSize, fill, align, fontFamily, rotation = 0) {
-		return { id: makeId(), type: "text", name, content, x, y, w, h, fontSize, fill, align, fontFamily, opacity: 1, rotation, locked: false };
+		return { id: makeId(), type: "text", name, content, x, y, w, h, fontSize, fill, align, fontFamily, opacity: 1, rotation, locked: false, shadow: "" };
 	}
 
 	function image(name, src, x, y, w, h) {
@@ -452,6 +521,12 @@
 		targetCtx.font = `900 ${size}px ${object.fontFamily}`;
 		targetCtx.textAlign = object.align || "left";
 		targetCtx.textBaseline = "top";
+		if (object.shadow) {
+			targetCtx.shadowColor = object.shadow;
+			targetCtx.shadowBlur = 2.2 * scale;
+			targetCtx.shadowOffsetX = 1.2 * scale;
+			targetCtx.shadowOffsetY = 1.2 * scale;
+		}
 		const maxWidth = object.w * scale;
 		const x = object.align === "center" ? maxWidth / 2 : object.align === "right" ? maxWidth : 0;
 		const lines = wrapText(targetCtx, object.content || "", maxWidth);
@@ -691,48 +766,51 @@
 	}
 
 	function addTextLayer(kind) {
+		const t = THEMES[activeTheme];
 		const size = kind === "title" ? { w: 88, h: 26 } : { w: 86, h: 36 };
 		const pos = zoneCenter(activeZone, size);
-		addObject(
-			text(
-				kind === "title" ? "Titre" : "Texte",
-				kind === "title" ? "TITRE DU FILM" : "Synopsis, casting, durée, copyright...",
-				pos.x,
-				pos.y,
-				size.w,
-				size.h,
-				kind === "title" ? 13 : 5,
-				kind === "title" ? "#fff365" : "#ffffff",
-				kind === "title" ? "center" : "left",
-				kind === "title" ? "Bungee, Impact, sans-serif" : "Roboto Condensed, Arial Narrow, sans-serif",
-			),
+		const layer = text(
+			kind === "title" ? "Titre" : "Texte",
+			kind === "title" ? "TITRE DU FILM" : "Synopsis, casting, durée, copyright...",
+			pos.x,
+			pos.y,
+			size.w,
+			size.h,
+			kind === "title" ? 13 : 5,
+			kind === "title" ? t.title : t.body,
+			kind === "title" ? "center" : "left",
+			kind === "title" ? t.titleFont : t.bodyFont,
 		);
+		layer.shadow = kind === "title" ? t.shadow : "";
+		addObject(layer);
 	}
 
 	function addTextAt(point) {
+		const t = THEMES[activeTheme];
 		const size = { w: 70, h: 26 };
-		addObject(
-			text(
-				"Texte libre",
-				"NOUVEAU TEXTE",
-				clamp(point.x - size.w / 2, 0, COVER.w - size.w),
-				clamp(point.y - size.h / 2, 0, COVER.h - size.h),
-				size.w,
-				size.h,
-				7,
-				"#ffffff",
-				"center",
-				"Bungee, Impact, sans-serif",
-			),
+		const layer = text(
+			"Texte libre",
+			"NOUVEAU TEXTE",
+			clamp(point.x - size.w / 2, 0, COVER.w - size.w),
+			clamp(point.y - size.h / 2, 0, COVER.h - size.h),
+			size.w,
+			size.h,
+			7,
+			t.title,
+			"center",
+			t.titleFont,
 		);
+		layer.shadow = t.shadow;
+		addObject(layer);
 		textContent.focus();
 		textContent.select();
 	}
 
 	function addRect() {
+		const t = THEMES[activeTheme];
 		const size = activeZone === "spine" ? { w: 18, h: 52 } : { w: 54, h: 34 };
 		const pos = zoneCenter(activeZone, size);
-		addObject(rect("Bloc couleur", pos.x, pos.y, size.w, size.h, "#ff2dd4"));
+		addObject(rect("Bloc couleur", pos.x, pos.y, size.w, size.h, t.secondary));
 	}
 
 	function addAsset(src, name = "Image", point = null) {
@@ -765,17 +843,87 @@
 			.catch(() => setStatus("Image impossible à charger."));
 	}
 
+	function frontObjects() {
+		return project.objects.filter((object) => object.x >= ZONES.front.x && !object.locked);
+	}
+
+	function rebuildFront(layoutKey) {
+		const t = THEMES[activeTheme];
+		const previous = frontObjects();
+		const oldTitle = previous.find((object) => object.type === "text" && object.fontSize >= 10)?.content || "TITRE\nDU FILM";
+		const oldTagline = previous.find((object) => object.type === "text" && object.fontSize < 7)?.content || "UNE NUIT, TOUT BASCULE";
+		project.objects = project.objects.filter((object, index) => index < 3 || object.x < ZONES.front.x);
+
+		const created = [];
+		const add = (object) => {
+			created.push(object);
+			return object;
+		};
+		if (layoutKey === "classic") {
+			add(rect("Affiche placeholder", 163, 28, 76, 100, t.secondary));
+			add(text("Titre", oldTitle, 150, 132, 102, 30, 18, t.title, "center", t.titleFont));
+			add(text("Accroche", oldTagline, 154, 165, 94, 7, 4, t.accent, "center", t.bodyFont));
+			add(text("Réalisateur", "UN FILM DE  PRÉNOM NOM", 154, 179, 94, 6, 3.3, t.body, "center", "SF Movie Poster Condensed, Impact, sans-serif"));
+		}
+		if (layoutKey === "bigtype") {
+			add(rect("Image plein recto", 150, 10, 102, 172, t.secondary));
+			add(rect("Bande titre", 144, 118, 114, 64, "#000000"));
+			add(text("Titre", oldTitle, 149, 124, 104, 44, 25, t.title, "center", t.titleFont));
+			add(text("Accroche", oldTagline, 154, 173, 94, 7, 4, t.accent, "center", t.bodyFont));
+		}
+		if (layoutKey === "poster") {
+			add(rect("Image plein cadre", 144, 0, 114, 194, t.secondary));
+			add(text("Titre", oldTitle, 150, 10, 102, 32, 15, t.title, "center", t.titleFont));
+			add(text("Accroche", oldTagline, 154, 176, 94, 7, 4, t.accent, "center", t.bodyFont));
+		}
+		if (layoutKey === "split") {
+			add(rect("Bande split", 144, 0, 114, 88, t.secondary));
+			add(rect("Image split", 159, 13, 84, 68, project.background));
+			add(text("Titre", oldTitle, 150, 96, 102, 54, 22, t.title, "center", t.titleFont));
+			add(text("Accroche", oldTagline, 154, 158, 94, 8, 4, t.accent, "center", t.bodyFont));
+			add(text("Réalisateur", "UN FILM DE  PRÉNOM NOM", 154, 178, 94, 6, 3.3, t.body, "center", "SF Movie Poster Condensed, Impact, sans-serif"));
+		}
+		created.forEach((object) => {
+			if (object.type === "text" && object.fontSize >= 10) object.shadow = t.shadow;
+			if (object.name?.includes("Bande titre")) object.opacity = 0.58;
+		});
+		project.objects.push(...created);
+		selectObject(created.find((object) => object.type === "text")?.id || null);
+	}
+
 	function applyTheme(theme) {
 		const [back, spine, front] = project.objects.slice(0, 3);
-		const themes = {
-			neon: ["#050506", "#17394d", "#7895bd"],
-			noir: ["#09090d", "#111111", "#19151f"],
-			cosmic: ["#15082f", "#47145c", "#0b6f94"],
-			rental: ["#f2e9cf", "#f43f5e", "#1f2937"],
-		};
-		[back.fill, spine.fill, front.fill] = themes[theme];
-		project.background = themes[theme][0];
+		const t = THEMES[theme] || THEMES.neon;
+		activeTheme = theme;
+		back.fill = t.back;
+		spine.fill = t.spine;
+		front.fill = t.front;
+		project.background = t.back;
+		project.objects.forEach((object) => {
+			if (object.locked) return;
+			if (object.type === "text") {
+				const isTitle = object.fontSize >= 10 || object.name === "Tranche";
+				object.fill = isTitle ? t.title : object.fontSize <= 4.5 ? t.accent : t.body;
+				object.fontFamily = isTitle ? t.titleFont : t.bodyFont;
+				object.shadow = isTitle ? t.shadow : "";
+			}
+			if (object.type === "rect" && object.name?.includes("Liseré")) object.fill = t.secondary;
+			if (object.type === "rect" && object.name?.includes("Bande cyan")) object.fill = t.accent;
+		});
+		document.querySelectorAll("[data-theme]").forEach((button) => {
+			button.dataset.active = String(button.dataset.theme === theme);
+		});
 		setStatus(`Ambiance ${theme}.`);
+		scheduleRender();
+	}
+
+	function applyLayout(layoutKey) {
+		activeLayout = layoutKey;
+		rebuildFront(layoutKey);
+		document.querySelectorAll("[data-layout]").forEach((button) => {
+			button.dataset.active = String(button.dataset.layout === layoutKey);
+		});
+		setStatus(`Mise en page ${layoutKey}.`);
 		scheduleRender();
 	}
 
@@ -882,6 +1030,7 @@
 		});
 
 		document.querySelectorAll("[data-theme]").forEach((button) => button.addEventListener("click", () => applyTheme(button.dataset.theme)));
+		document.querySelectorAll("[data-layout]").forEach((button) => button.addEventListener("click", () => applyLayout(button.dataset.layout)));
 		addTitle.addEventListener("click", () => addTextLayer("title"));
 		addTextButton.addEventListener("click", () => addTextLayer("body"));
 		addBox.addEventListener("click", addRect);
@@ -1165,7 +1314,7 @@
 </script>
 
 <style>
-	@import url("https://fonts.googleapis.com/css2?family=Anton&family=Archivo+Black&family=Audiowide&family=Bebas+Neue&family=Bungee&family=Bungee+Inline&family=Courier+Prime:wght@400;700&family=Creepster&family=Michroma&family=Monoton&family=Orbitron:wght@400;700;900&family=Oswald:wght@400;700&family=Roboto+Condensed:wght@400;700;900&family=Special+Elite&display=swap");
+	@import url("https://fonts.googleapis.com/css2?family=Anton&family=Archivo+Black&family=Audiowide&family=Bebas+Neue&family=Bungee&family=Bungee+Inline&family=Bungee+Shade&family=Courier+Prime:wght@400;700&family=Creepster&family=Michroma&family=Monoton&family=Orbitron:wght@400;700;900&family=Oswald:wght@400;700&family=Roboto+Condensed:wght@400;700;900&family=Special+Elite&family=VT323&display=swap");
 
 	@font-face {
 		font-family: "SF Movie Poster";
@@ -1721,6 +1870,733 @@
 
 		.measure-strip span:last-child {
 			border-bottom: 0;
+		}
+	}
+
+	/* Prototype rework overrides */
+	:root {
+		--proto-bg: #0b0710;
+		--proto-panel: rgba(20, 10, 35, 0.94);
+		--proto-panel-2: #100719;
+		--proto-line: #2a1640;
+		--proto-line-hot: #ff2da855;
+		--proto-ink: #efe6ff;
+		--proto-muted: #c8b8e0;
+		--proto-cyan: #00e0ff;
+		--proto-pink: #ff2da8;
+		--proto-yellow: #ffe357;
+		font-family: "VT323", ui-monospace, "SF Mono", monospace;
+	}
+
+	html,
+	body {
+		height: 100%;
+		overflow: hidden;
+	}
+
+	body {
+		background:
+			radial-gradient(ellipse 1200px 700px at 50% 110%, rgba(255, 30, 180, 0.25), transparent 60%),
+			radial-gradient(ellipse 900px 600px at 0% 0%, rgba(80, 40, 200, 0.35), transparent 65%),
+			radial-gradient(ellipse 800px 500px at 100% 0%, rgba(0, 200, 255, 0.18), transparent 65%),
+			linear-gradient(180deg, #0b0710 0%, #160a22 100%);
+		color: var(--proto-ink);
+		user-select: none;
+	}
+
+	body::before {
+		content: "";
+		position: fixed;
+		inset: 0;
+		z-index: 0;
+		pointer-events: none;
+		background-image:
+			linear-gradient(rgba(255, 60, 200, 0.07) 1px, transparent 1px),
+			linear-gradient(90deg, rgba(0, 220, 255, 0.07) 1px, transparent 1px);
+		background-size: 40px 40px;
+		mask-image: linear-gradient(180deg, transparent 0%, black 30%, black 70%, transparent 100%);
+	}
+
+	.app {
+		position: relative;
+		z-index: 1;
+		display: grid;
+		grid-template-rows: auto 1fr;
+		grid-template-columns: 280px minmax(0, 1fr) 320px;
+		grid-template-areas:
+			"top top top"
+			"left main right";
+		height: 100vh;
+	}
+
+	.topbar {
+		grid-area: top;
+		display: flex;
+		align-items: center;
+		gap: 16px;
+		min-height: 58px;
+		padding: 10px 18px;
+		border: 0;
+		border-bottom: 1px solid var(--proto-line);
+		border-radius: 0;
+		background: linear-gradient(180deg, #1a0e2a 0%, #0e0617 100%);
+		box-shadow: 0 2px 0 #ff2da855, 0 4px 20px #00000080;
+	}
+
+	.brand {
+		display: flex;
+		align-items: baseline;
+		gap: 10px;
+		padding: 4px 12px 6px;
+		border-radius: 4px;
+		background: linear-gradient(180deg, var(--proto-pink) 0%, #b71c87 100%);
+		box-shadow: inset 0 1px 0 #ffffff66, 0 0 0 1px #000, 0 0 18px #ff2da866;
+		text-shadow: 0 1px 0 #00000066;
+	}
+
+	.brand__logo {
+		color: #fffaf0;
+		font-family: "SF Movie Poster Condensed", Impact, sans-serif;
+		font-size: 26px;
+		font-weight: 700;
+		letter-spacing: 1px;
+		line-height: 1;
+	}
+
+	.brand__sub {
+		color: #220015;
+		font-size: 13px;
+		letter-spacing: 2px;
+		text-transform: uppercase;
+	}
+
+	.topbar__festival {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		padding-left: 18px;
+		border-left: 1px dashed var(--proto-line-hot);
+		line-height: 1;
+	}
+
+	.topbar__festival small {
+		color: var(--proto-cyan);
+		font-size: 10px;
+		letter-spacing: 2px;
+		text-shadow: 0 0 8px #00e0ff66;
+		text-transform: uppercase;
+	}
+
+	.topbar__festival strong {
+		color: var(--proto-yellow);
+		font-family: "SF Movie Poster", sans-serif;
+		font-size: 14px;
+		letter-spacing: 1px;
+	}
+
+	.topbar__spacer {
+		flex: 1;
+	}
+
+	.topbar__action,
+	.btn,
+	.file-action,
+	.upload-button {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 6px;
+		min-height: 34px;
+		padding: 8px 12px;
+		border: 1px solid #3a1f5e;
+		border-radius: 3px;
+		background: #1a0e2a;
+		color: var(--proto-ink);
+		font-size: 11px;
+		letter-spacing: 1.5px;
+		text-transform: uppercase;
+		transition: background 0.12s, border-color 0.12s, color 0.12s, transform 0.12s;
+	}
+
+	.topbar__action:hover,
+	.btn:hover,
+	.file-action:hover,
+	.upload-button:hover {
+		border-color: var(--proto-pink);
+		background: #2a1640;
+		color: #fff;
+	}
+
+	.topbar__action--primary,
+	.btn--neon {
+		border-color: #c47f00;
+		background: linear-gradient(180deg, var(--proto-yellow), #f5a623);
+		color: #1a0a00;
+		font-weight: 700;
+		box-shadow: 0 0 0 1px #00000066, 0 0 14px #ffe35766;
+	}
+
+	.topbar__action--secondary {
+		background: #160a22;
+	}
+
+	.btn--ghost {
+		border-style: dashed;
+		background: transparent;
+	}
+
+	.btn--danger {
+		color: #ff5577;
+	}
+
+	.file-action input,
+	.upload-button input,
+	.guide-toggle input {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		opacity: 0;
+		pointer-events: none;
+	}
+
+	.rail {
+		position: relative;
+		z-index: 2;
+		overflow-y: auto;
+		background: linear-gradient(180deg, rgba(20, 10, 35, 0.94) 0%, rgba(10, 5, 20, 0.94) 100%);
+		backdrop-filter: blur(6px);
+		scrollbar-color: var(--proto-pink) #1a0e2a;
+		scrollbar-width: thin;
+	}
+
+	.rail--left {
+		grid-area: left;
+		border-right: 1px solid var(--proto-line);
+	}
+
+	.rail--right {
+		grid-area: right;
+		border-left: 1px solid var(--proto-line);
+	}
+
+	.section {
+		padding: 14px 16px;
+		border-bottom: 1px dashed var(--proto-line);
+	}
+
+	.section__head {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		margin-bottom: 10px;
+	}
+
+	.section__dot {
+		width: 8px;
+		height: 8px;
+		border-radius: 50%;
+		background: var(--proto-pink);
+		box-shadow: 0 0 8px var(--proto-pink);
+		animation: pulse 1.6s ease-in-out infinite;
+	}
+
+	.section__title {
+		color: var(--proto-cyan);
+		font-size: 11px;
+		letter-spacing: 2px;
+		text-shadow: 0 0 6px #00e0ff66;
+		text-transform: uppercase;
+	}
+
+	.themes,
+	.layouts,
+	.tool-grid,
+	.layer-actions {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 8px;
+	}
+
+	.segment {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 6px;
+	}
+
+	.segment button,
+	.theme,
+	.layout,
+	.asset {
+		border-radius: 3px;
+	}
+
+	.segment button.active {
+		border-color: var(--proto-yellow);
+		background: #2a1f0e;
+		color: var(--proto-yellow);
+		box-shadow: 0 0 8px #ffe35744;
+	}
+
+	.theme,
+	.layout {
+		position: relative;
+		overflow: hidden;
+		padding: 0;
+		border: 2px solid #3a1f5e;
+		background: #000;
+		cursor: pointer;
+		transition: border-color 0.12s, transform 0.12s;
+	}
+
+	.theme {
+		aspect-ratio: 1.2 / 1;
+	}
+
+	.layout {
+		aspect-ratio: 0.7 / 1;
+		background: #1a0e2a;
+	}
+
+	.theme:hover,
+	.layout:hover {
+		transform: translateY(-2px);
+		border-color: var(--proto-pink);
+	}
+
+	.theme[data-active="true"],
+	.layout[data-active="true"] {
+		border-color: var(--proto-yellow);
+		box-shadow: 0 0 0 1px var(--proto-yellow), 0 0 16px #ffe35766;
+	}
+
+	.theme__preview,
+	.layout__preview {
+		position: absolute;
+		inset: 0;
+	}
+
+	.theme__preview::before,
+	.layout__preview::before,
+	.layout__preview::after {
+		content: "";
+		position: absolute;
+	}
+
+	.theme__preview--neon {
+		background:
+			radial-gradient(circle at 50% 58%, #ffd84a 0 18%, #ff5d4a 19% 30%, transparent 31%),
+			linear-gradient(180deg, #1b0540 0%, #b91776 56%, #ffb04a 100%);
+	}
+
+	.theme__preview--rental {
+		background:
+			radial-gradient(circle at 75% 20%, #d23218 0 14%, transparent 15%),
+			linear-gradient(170deg, #f4e3b6 0%, #c8a05a 100%);
+	}
+
+	.theme__preview--scifi {
+		background:
+			radial-gradient(circle at 72% 26%, #ffe89a 0 10%, #ff8a3a 11% 22%, transparent 23%),
+			linear-gradient(165deg, #02030c 0%, #0a1238 38%, #5e1a78 100%);
+	}
+
+	.theme__preview--horror {
+		background:
+			radial-gradient(circle at 50% 30%, #3a0a08 0 22%, transparent 45%),
+			linear-gradient(175deg, #0a0102 0%, #3a0a08 70%, #0a0102 100%);
+	}
+
+	.theme__label,
+	.layout__name {
+		position: absolute;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		padding: 4px 6px;
+		background: #00000099;
+		color: #fff;
+		font-size: 9px;
+		letter-spacing: 1.5px;
+		text-align: center;
+		text-shadow: 0 1px 2px #000;
+		text-transform: uppercase;
+	}
+
+	.layout__preview--classic::before {
+		inset: 8px 10px auto;
+		height: 54%;
+		background: #3a1f5e;
+	}
+
+	.layout__preview--classic::after {
+		right: 10px;
+		bottom: 30px;
+		left: 10px;
+		height: 18px;
+		background: var(--proto-yellow);
+	}
+
+	.layout__preview--bigtype::before {
+		inset: 8px;
+		background: #3a1f5e;
+	}
+
+	.layout__preview--bigtype::after {
+		right: 8px;
+		bottom: 8px;
+		left: 8px;
+		height: 40%;
+		background: linear-gradient(180deg, transparent, #000d);
+	}
+
+	.layout__preview--poster {
+		background: linear-gradient(135deg, var(--proto-pink), var(--proto-cyan));
+	}
+
+	.layout__preview--poster::after {
+		right: 8px;
+		top: 10px;
+		left: 8px;
+		height: 16px;
+		background: var(--proto-yellow);
+	}
+
+	.layout__preview--split::before {
+		inset: 0 0 auto;
+		height: 48%;
+		background: var(--proto-pink);
+	}
+
+	.layout__preview--split::after {
+		right: 8px;
+		top: 58%;
+		left: 8px;
+		height: 28px;
+		background: var(--proto-yellow);
+	}
+
+	.asset-tray {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 6px;
+		max-height: 330px;
+		overflow: auto;
+		padding-right: 3px;
+	}
+
+	.asset {
+		display: grid;
+		grid-template-rows: 44px auto;
+		gap: 4px;
+		align-items: center;
+		justify-items: center;
+		min-height: 72px;
+		padding: 5px;
+		background: #100719;
+		border: 1px solid var(--proto-line);
+		color: var(--proto-muted);
+		font-size: 9px;
+		line-height: 1;
+		letter-spacing: 0.4px;
+	}
+
+	.asset img {
+		max-width: 100%;
+		max-height: 44px;
+		object-fit: contain;
+		filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.2));
+	}
+
+	.asset span {
+		width: 100%;
+		overflow: hidden;
+		text-align: center;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.asset-count {
+		display: block;
+		margin-top: 8px;
+		color: #c8b8e0aa;
+		font-size: 10px;
+		letter-spacing: 1.5px;
+		text-transform: uppercase;
+	}
+
+	.stage-shell {
+		grid-area: main;
+		position: relative;
+		display: grid;
+		grid-template-rows: 1fr auto;
+		min-width: 0;
+		overflow: hidden;
+		padding: 24px 24px 14px;
+	}
+
+	.stage__hint {
+		position: absolute;
+		top: 14px;
+		left: 50%;
+		z-index: 4;
+		transform: translateX(-50%);
+		padding: 4px 10px;
+		border: 1px dashed #3a1f5e;
+		border-radius: 3px;
+		background: #00000066;
+		color: #c8b8e0aa;
+		font-size: 10px;
+		letter-spacing: 2px;
+		pointer-events: none;
+		text-transform: uppercase;
+		white-space: nowrap;
+	}
+
+	.stage-scroller {
+		display: grid;
+		align-items: center;
+		justify-items: center;
+		overflow: auto;
+		min-height: 0;
+		padding: 28px 12px 18px;
+		border: 0;
+		background: transparent;
+	}
+
+	.canvas-stage {
+		position: relative;
+		display: grid;
+		place-items: center;
+		width: min(100%, 1200px);
+		min-height: 100%;
+		padding: 0;
+		border: 0;
+		background: transparent;
+	}
+
+	#coverCanvas {
+		display: block;
+		max-width: 100%;
+		border: 0;
+		background: #ddd;
+		box-shadow:
+			0 0 0 1px #00000088,
+			0 30px 80px rgba(0, 0, 0, 0.65),
+			0 10px 40px rgba(255, 45, 168, 0.25);
+		touch-action: none;
+	}
+
+	.statusbar {
+		display: flex;
+		justify-content: space-between;
+		gap: 12px;
+		margin: 0;
+		padding: 8px 10px;
+		border: 1px solid var(--proto-line);
+		border-radius: 4px;
+		background: #100719cc;
+		color: #c8b8e0aa;
+		font-size: 11px;
+		letter-spacing: 0.8px;
+	}
+
+	.selected-row {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 10px;
+		margin-bottom: 10px;
+		color: #c8b8e0aa;
+		font-size: 11px;
+		letter-spacing: 1.5px;
+		text-transform: uppercase;
+	}
+
+	.selected-row strong {
+		color: var(--proto-yellow);
+		font-weight: 400;
+	}
+
+	.field {
+		display: grid;
+		gap: 4px;
+		margin-bottom: 10px;
+	}
+
+	.label,
+	.slider-row label,
+	.position-grid label {
+		color: var(--proto-muted);
+		font-size: 10px;
+		font-weight: 400;
+		letter-spacing: 1.5px;
+		text-transform: uppercase;
+	}
+
+	.input,
+	.textarea,
+	input[type="number"],
+	select,
+	textarea {
+		border: 1px solid var(--proto-line);
+		border-radius: 3px;
+		background: var(--proto-panel-2);
+		color: var(--proto-ink);
+		font-family: "VT323", monospace;
+		font-size: 13px;
+		outline: none;
+	}
+
+	.input,
+	.textarea,
+	input[type="number"] {
+		padding: 8px 10px;
+	}
+
+	.input:focus,
+	.textarea:focus,
+	input[type="number"]:focus {
+		border-color: var(--proto-pink);
+		box-shadow: 0 0 0 2px #ff2da833;
+	}
+
+	.textarea {
+		min-height: 76px;
+		resize: vertical;
+	}
+
+	.slider-row {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		margin-bottom: 10px;
+	}
+
+	.slider-row label {
+		flex: 0 0 70px;
+	}
+
+	.slider-row input[type="range"] {
+		flex: 1;
+	}
+
+	input[type="range"] {
+		accent-color: var(--proto-pink);
+	}
+
+	input[type="color"] {
+		width: 100%;
+		height: 34px;
+		padding: 3px;
+		border: 1px solid var(--proto-line);
+		border-radius: 3px;
+		background: var(--proto-panel-2);
+	}
+
+	.split {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 10px;
+	}
+
+	.position-grid {
+		display: grid;
+		grid-template-columns: repeat(4, 1fr);
+		gap: 6px;
+		margin-top: 10px;
+	}
+
+	.position-grid label {
+		display: grid;
+		gap: 4px;
+	}
+
+	.print-spec {
+		display: grid;
+		gap: 6px;
+	}
+
+	.print-spec div {
+		display: flex;
+		justify-content: space-between;
+		gap: 10px;
+		padding: 8px 10px;
+		border: 1px solid var(--proto-line);
+		border-radius: 3px;
+		background: var(--proto-panel-2);
+		color: var(--proto-muted);
+		font-size: 11px;
+		letter-spacing: 1px;
+		text-transform: uppercase;
+	}
+
+	.print-spec strong {
+		color: var(--proto-cyan);
+		font-weight: 400;
+	}
+
+	.inspector.empty::before {
+		content: "Sélectionnez un élément sur la jaquette";
+		display: block;
+		padding: 18px;
+		color: #c8b8e066;
+		font-size: 11px;
+		letter-spacing: 1.5px;
+		text-align: center;
+		text-transform: uppercase;
+	}
+
+	.inspector.empty > * {
+		opacity: 0.38;
+	}
+
+	@media (max-width: 1100px) {
+		.app {
+			grid-template-columns: 230px minmax(0, 1fr) 270px;
+		}
+
+		.topbar__festival strong {
+			display: none;
+		}
+	}
+
+	@media (max-width: 900px) {
+		html,
+		body {
+			overflow: auto;
+		}
+
+		.app {
+			height: auto;
+			min-height: 100vh;
+			grid-template-columns: 1fr;
+			grid-template-areas:
+				"top"
+				"main"
+				"left"
+				"right";
+		}
+
+		.rail {
+			max-height: none;
+			border: 0;
+		}
+
+		.stage-shell {
+			min-height: 62vh;
+			padding: 20px 10px 10px;
+		}
+
+		.topbar {
+			flex-wrap: wrap;
+		}
+
+		.stage__hint {
+			display: none;
+		}
+
+		.statusbar {
+			flex-direction: column;
 		}
 	}
 </style>
