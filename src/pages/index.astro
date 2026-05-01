@@ -22,18 +22,24 @@
 					<strong>CONTRE-FICTIONS · BOSKOP · LES INTERGALACTIQUES</strong>
 				</div>
 				<div class="topbar__spacer"></div>
-				<button class="topbar__action topbar__action--secondary" id="saveProject" type="button">Sauver</button>
-				<label class="topbar__action topbar__action--secondary file-action">
-					Charger
-					<input id="loadProject" type="file" accept="application/json" />
-				</label>
-				<label class="topbar__action topbar__action--secondary guide-toggle">
-					<input id="toggleGuides" type="checkbox" checked />
-					Repères
-				</label>
-				<button class="topbar__action" id="exportPng" type="button">↓ PNG</button>
-				<button class="topbar__action topbar__action--primary" id="exportPdf" type="button">↓ PDF impression</button>
+				<div class="topbar__actions" id="topbarActions">
+					<button class="topbar__action topbar__action--secondary" id="saveProject" type="button">Sauver</button>
+					<label class="topbar__action topbar__action--secondary file-action">
+						Charger
+						<input id="loadProject" type="file" accept="application/json" />
+					</label>
+					<label class="topbar__action topbar__action--secondary guide-toggle">
+						<input id="toggleGuides" type="checkbox" checked />
+						Repères
+					</label>
+					<button class="topbar__action" id="exportPng" type="button">↓ PNG</button>
+					<button class="topbar__action topbar__action--primary" id="exportPdf" type="button">↓ PDF impression</button>
+				</div>
+				<button class="topbar__menu-toggle" id="topbarMenu" type="button" aria-label="Menu" aria-expanded="false">
+					<span></span><span></span><span></span>
+				</button>
 			</header>
+			<div class="mobile-backdrop" id="mobileBackdrop" aria-hidden="true"></div>
 
 			<aside class="rail rail--left" aria-label="Outils de jaquette">
 				<div class="section">
@@ -114,16 +120,28 @@
 
 			<main class="stage-shell" aria-label="Zone de création">
 				<div class="stage__topbar">
+					<button class="stage__rail-toggle stage__rail-toggle--left" id="toggleToolsRail" type="button" aria-label="Outils" aria-pressed="false">
+						<span class="stage__rail-icon" aria-hidden="true">▤</span>
+						<span class="stage__rail-text">Outils</span>
+					</button>
 					<div class="segment" role="group" aria-label="Zone cible">
 						<button class="active" data-zone="front" type="button">Recto</button>
 						<button data-zone="back" type="button">Verso</button>
 						<button data-zone="spine" type="button">Tranche</button>
 					</div>
 					<div class="stage__hint">Cliquez un élément · glissez les coins pour redimensionner · double-clic pour éditer le texte</div>
+					<button class="stage__rail-toggle stage__rail-toggle--right" id="toggleInspectorRail" type="button" aria-label="Calques" aria-pressed="false">
+						<span class="stage__rail-icon" aria-hidden="true">⚙</span>
+						<span class="stage__rail-text">Calques</span>
+					</button>
 				</div>
 				<div class="stage-scroller" id="stageScroller">
 					<div class="canvas-stage" id="dropStage">
 						<canvas id="coverCanvas" aria-label="Prévisualisation de la jaquette VHS"></canvas>
+						<button class="canvas-delete" id="canvasDelete" type="button" aria-label="Supprimer l'élément" hidden>
+							<span class="canvas-delete__icon" aria-hidden="true">✕</span>
+							<span class="canvas-delete__confirm">Confirmer ?</span>
+						</button>
 					</div>
 				</div>
 				<div class="stage__zoom">
@@ -213,14 +231,16 @@
 							</select>
 						</div>
 					</div>
-					<button class="btn btn--ghost image-controls" id="replaceImage" type="button">↥ Remplacer l'image</button>
+					<label class="btn btn--ghost image-controls file-action" id="replaceImage">
+						↥ Remplacer l'image
+						<input id="replaceImageInput" type="file" accept="image/jpeg,image/png,.jpg,.jpeg,.png" />
+					</label>
 					<div class="position-grid">
 						<label>X <input id="posX" type="number" step="1" /></label>
 						<label>Y <input id="posY" type="number" step="1" /></label>
 						<label>L <input id="posW" type="number" step="1" /></label>
 						<label>H <input id="posH" type="number" step="1" /></label>
 					</div>
-					<input id="replaceImageInput" type="file" accept="image/jpeg,image/png,.jpg,.jpeg,.png" hidden />
 					<div class="layer-actions">
 						<button class="btn" id="bringForward" type="button">▲ Monter</button>
 						<button class="btn" id="sendBackward" type="button">▼ Descendre</button>
@@ -367,6 +387,8 @@
 	const sendBackward = document.querySelector("#sendBackward");
 	const duplicateLayer = document.querySelector("#duplicateLayer");
 	const deleteLayer = document.querySelector("#deleteLayer");
+	const canvasDelete = document.querySelector("#canvasDelete");
+	let canvasDeleteConfirmTimer = 0;
 
 	let activeZone = "front";
 	let selectedId = null;
@@ -446,6 +468,7 @@
 		canvas.height = Math.round(cssH * dpr);
 		currentScale = canvas.width / COVER.w;
 		render();
+		updateCanvasDeleteButton();
 	}
 
 	function render(targetCanvas = canvas, opts = {}) {
@@ -735,9 +758,64 @@
 	}
 
 	function selectObject(id) {
+		if (id !== selectedId) resetCanvasDeleteConfirm();
 		selectedId = id;
 		updateInspector();
+		updateCanvasDeleteButton();
 		scheduleRender();
+	}
+
+	function openInspectorDrawerIfMobile() {
+		if (!window.matchMedia("(max-width: 900px)").matches) return;
+		if (document.body.classList.contains("is-inspector-open")) return;
+		document.querySelector("#toggleInspectorRail")?.click();
+	}
+
+	function resetCanvasDeleteConfirm() {
+		if (canvasDeleteConfirmTimer) {
+			clearTimeout(canvasDeleteConfirmTimer);
+			canvasDeleteConfirmTimer = 0;
+		}
+		canvasDelete.dataset.confirming = "false";
+	}
+
+	function updateCanvasDeleteButton() {
+		const object = getSelected();
+		if (!object || object.locked) {
+			canvasDelete.hidden = true;
+			resetCanvasDeleteConfirm();
+			return;
+		}
+		const stage = canvas.parentElement;
+		if (!stage) return;
+		const stageRect = stage.getBoundingClientRect();
+		const canvasRect = canvas.getBoundingClientRect();
+		if (!canvasRect.width) return;
+		const offsetLeft = canvasRect.left - stageRect.left;
+		const offsetTop = canvasRect.top - stageRect.top;
+		const scale = canvasRect.width / COVER.w;
+		const corner = localToWorld(object, { x: object.w, y: 0 });
+		const left = corner.x * scale + offsetLeft;
+		const top = corner.y * scale + offsetTop;
+		canvasDelete.hidden = false;
+		canvasDelete.style.left = `${left}px`;
+		canvasDelete.style.top = `${top}px`;
+	}
+
+	function onCanvasDeleteClick(event) {
+		event.stopPropagation();
+		const object = getSelected();
+		if (!object || object.locked) return;
+		if (canvasDelete.dataset.confirming === "true") {
+			resetCanvasDeleteConfirm();
+			deleteSelected();
+			return;
+		}
+		canvasDelete.dataset.confirming = "true";
+		if (canvasDeleteConfirmTimer) clearTimeout(canvasDeleteConfirmTimer);
+		canvasDeleteConfirmTimer = setTimeout(() => {
+			resetCanvasDeleteConfirm();
+		}, 3500);
 	}
 
 	function updateInspector() {
@@ -749,7 +827,9 @@
 			control.disabled = !object || object.type !== "text";
 		});
 		imageFit.disabled = !object || object.type !== "image";
-		replaceImage.disabled = !object || object.type !== "image";
+		const replaceDisabled = !object || object.type !== "image";
+		replaceImageInput.disabled = replaceDisabled;
+		replaceImage.setAttribute("aria-disabled", replaceDisabled ? "true" : "false");
 		if (!object) return;
 		textContent.value = object.type === "text" ? object.content : "";
 		fontFamily.value = object.fontFamily || "Arial, sans-serif";
@@ -1082,12 +1162,14 @@
 		for (const control of [textContent, fontFamily, fontSize, fillColor, opacity, rotation, textAlign, imageFit, posX, posY, posW, posH]) {
 			control.addEventListener("input", applyInspectorChange);
 		}
-		replaceImage.addEventListener("click", () => replaceImageInput.click());
 		replaceImageInput.addEventListener("change", replaceSelectedImage);
 		bringForward.addEventListener("click", () => moveLayer(1));
 		sendBackward.addEventListener("click", () => moveLayer(-1));
 		duplicateLayer.addEventListener("click", duplicateSelected);
 		deleteLayer.addEventListener("click", deleteSelected);
+
+		canvasDelete.addEventListener("click", onCanvasDeleteClick);
+		canvasDelete.addEventListener("pointerdown", (event) => event.stopPropagation());
 
 		canvas.addEventListener("pointerdown", onPointerDown);
 		canvas.addEventListener("pointermove", onPointerMove);
@@ -1096,10 +1178,13 @@
 		canvas.addEventListener("dblclick", (event) => {
 			const point = canvasPoint(event);
 			const object = hitTest(point);
-			if (object?.type === "text") {
+			if (object) {
 				selectObject(object.id);
-				textContent.focus();
-				textContent.select();
+				openInspectorDrawerIfMobile();
+				if (object.type === "text") {
+					textContent.focus();
+					textContent.select();
+				}
 				return;
 			}
 			addTextAt(point);
@@ -1108,9 +1193,68 @@
 		stage.addEventListener("drop", onDrop);
 		window.addEventListener("resize", setupCanvasSize);
 		window.addEventListener("keydown", onKeyDown);
+
+		wireMobileChrome();
+	}
+
+	function wireMobileChrome() {
+		const menuToggle = document.querySelector("#topbarMenu");
+		const toolsToggle = document.querySelector("#toggleToolsRail");
+		const inspectorToggle = document.querySelector("#toggleInspectorRail");
+		const backdrop = document.querySelector("#mobileBackdrop");
+		const body = document.body;
+
+		const states = {
+			menu: { className: "is-menu-open", toggle: menuToggle, attr: "aria-expanded" },
+			tools: { className: "is-tools-open", toggle: toolsToggle, attr: "aria-pressed" },
+			inspector: { className: "is-inspector-open", toggle: inspectorToggle, attr: "aria-pressed" },
+		};
+
+		function closeAll(except) {
+			for (const [key, state] of Object.entries(states)) {
+				if (key === except) continue;
+				body.classList.remove(state.className);
+				if (state.toggle) state.toggle.setAttribute(state.attr, "false");
+			}
+		}
+
+		function toggle(key) {
+			const state = states[key];
+			if (!state || !state.toggle) return;
+			const willOpen = !body.classList.contains(state.className);
+			closeAll(willOpen ? key : null);
+			body.classList.toggle(state.className, willOpen);
+			state.toggle.setAttribute(state.attr, willOpen ? "true" : "false");
+		}
+
+		menuToggle?.addEventListener("click", () => toggle("menu"));
+		toolsToggle?.addEventListener("click", () => toggle("tools"));
+		inspectorToggle?.addEventListener("click", () => toggle("inspector"));
+		backdrop?.addEventListener("click", () => closeAll(null));
+
+		document.querySelector(".rail--left")?.addEventListener("click", (event) => {
+			if (event.target.closest("button, label, input, select, textarea, .asset, .rating")) {
+				body.classList.remove(states.tools.className);
+				toolsToggle?.setAttribute(states.tools.attr, "false");
+			}
+		});
+
+		document.querySelectorAll("#topbarActions .topbar__action").forEach((node) => {
+			node.addEventListener("click", () => {
+				body.classList.remove(states.menu.className);
+				menuToggle?.setAttribute(states.menu.attr, "false");
+			});
+		});
+
+		const desktopQuery = window.matchMedia("(min-width: 901px)");
+		const handleViewport = () => {
+			if (desktopQuery.matches) closeAll(null);
+		};
+		desktopQuery.addEventListener?.("change", handleViewport);
 	}
 
 	function onPointerDown(event) {
+		resetCanvasDeleteConfirm();
 		canvas.setPointerCapture(event.pointerId);
 		const point = canvasPoint(event);
 		const handle = hitHandle(point);
@@ -1151,6 +1295,7 @@
 		if (pointerMode === "resize") resizeObject(object, point, dragState);
 		if (pointerMode === "rotate") rotateObject(object, point, dragState, event.shiftKey);
 		updateInspector();
+		updateCanvasDeleteButton();
 		scheduleRender();
 	}
 
@@ -2139,6 +2284,19 @@
 		background: linear-gradient(180deg, #221808 0%, #150d05 100%);
 	}
 
+	.topbar__actions {
+		display: contents;
+	}
+
+	.topbar__menu-toggle,
+	.stage__rail-toggle {
+		display: none;
+	}
+
+	.mobile-backdrop {
+		display: none;
+	}
+
 	.btn--ghost {
 		border-style: dashed;
 		background: transparent;
@@ -2157,6 +2315,13 @@
 		width: 1px;
 		height: 1px;
 		opacity: 0;
+		pointer-events: none;
+	}
+
+	.file-action[aria-disabled="true"],
+	.upload-button[aria-disabled="true"] {
+		opacity: 0.5;
+		cursor: not-allowed;
 		pointer-events: none;
 	}
 
@@ -2663,6 +2828,91 @@
 		background: transparent;
 	}
 
+	.canvas-delete {
+		position: absolute;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 6px;
+		min-width: 40px;
+		min-height: 40px;
+		padding: 0 12px;
+		border: 2px solid rgba(255, 235, 220, 0.95);
+		border-radius: 22px;
+		background: linear-gradient(180deg, #d33424 0%, #8a1f15 100%);
+		color: #fff8f0;
+		font-family: var(--font-ui);
+		font-size: 14px;
+		font-weight: 800;
+		letter-spacing: 0.6px;
+		text-transform: uppercase;
+		text-shadow: 0 1px 0 rgba(0, 0, 0, 0.5);
+		box-shadow:
+			0 0 0 1px rgba(20, 12, 6, 0.85),
+			0 6px 16px rgba(0, 0, 0, 0.6),
+			inset 0 1px 0 rgba(255, 220, 200, 0.45);
+		cursor: pointer;
+		z-index: 6;
+		transform: translate(-50%, -50%);
+		transition: transform 0.16s ease, background 0.16s ease, padding 0.16s ease;
+		touch-action: manipulation;
+		-webkit-user-select: none;
+		user-select: none;
+	}
+
+	.canvas-delete[hidden] {
+		display: none;
+	}
+
+	.canvas-delete:hover {
+		background: linear-gradient(180deg, #e64a3a 0%, #9a2a1d 100%);
+	}
+
+	.canvas-delete:active {
+		transform: translate(-50%, -50%) scale(0.96);
+	}
+
+	.canvas-delete .canvas-delete__icon {
+		font-size: 16px;
+		line-height: 1;
+	}
+
+	.canvas-delete .canvas-delete__confirm {
+		display: none;
+	}
+
+	.canvas-delete[data-confirming="true"] {
+		padding: 0 16px;
+		background: linear-gradient(180deg, #ffd84a 0%, #c8881a 100%);
+		color: #1f0f02;
+		border-color: #2a1808;
+		text-shadow: 0 1px 0 rgba(255, 230, 170, 0.55);
+		animation: canvas-delete-pulse 0.9s ease-in-out infinite;
+	}
+
+	.canvas-delete[data-confirming="true"] .canvas-delete__icon {
+		display: none;
+	}
+
+	.canvas-delete[data-confirming="true"] .canvas-delete__confirm {
+		display: inline;
+	}
+
+	@keyframes canvas-delete-pulse {
+		0%, 100% {
+			box-shadow:
+				0 0 0 1px rgba(20, 12, 6, 0.85),
+				0 6px 16px rgba(0, 0, 0, 0.6),
+				0 0 0 0 rgba(255, 216, 74, 0.55);
+		}
+		50% {
+			box-shadow:
+				0 0 0 1px rgba(20, 12, 6, 0.85),
+				0 6px 16px rgba(0, 0, 0, 0.6),
+				0 0 0 8px rgba(255, 216, 74, 0);
+		}
+	}
+
 	#coverCanvas {
 		display: block;
 		max-width: 100%;
@@ -2871,40 +3121,251 @@
 	@media (max-width: 900px) {
 		html,
 		body {
-			overflow: auto;
+			height: 100%;
+			overflow: hidden;
 		}
 
 		.app {
-			height: auto;
+			height: 100vh;
 			min-height: 100vh;
+			grid-template-rows: auto 1fr;
 			grid-template-columns: 1fr;
 			grid-template-areas:
 				"top"
-				"main"
-				"left"
-				"right";
-		}
-
-		.rail {
-			max-height: none;
-			border: 0;
-		}
-
-		.stage-shell {
-			min-height: 62vh;
-			padding: 20px 10px 10px;
+				"main";
 		}
 
 		.topbar {
-			flex-wrap: wrap;
+			z-index: 30;
+			flex-direction: row;
+			align-items: center;
+			flex-wrap: nowrap;
+			gap: 10px;
+			min-height: 56px;
+			padding: 8px 12px;
+		}
+
+		.brand {
+			flex: 1 1 auto;
+			justify-content: center;
+			padding: 5px 10px 7px;
+			gap: 8px;
+			min-width: 0;
+			overflow: hidden;
+		}
+
+		.brand__logo {
+			font-size: 24px;
+			letter-spacing: 0.6px;
+			white-space: nowrap;
+		}
+
+		.brand__sub {
+			font-size: 10px;
+			letter-spacing: 1.2px;
+			white-space: nowrap;
+		}
+
+		.topbar__festival {
+			display: none;
+		}
+
+		.topbar__spacer {
+			display: none;
+		}
+
+		.topbar__menu-toggle {
+			display: inline-flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			gap: 5px;
+			width: 44px;
+			min-width: 44px;
+			min-height: 44px;
+			padding: 0;
+		}
+
+		.topbar__menu-toggle span {
+			display: block;
+			width: 22px;
+			height: 2px;
+			border-radius: 2px;
+			background: var(--proto-yellow);
+			transition: transform 0.18s ease, opacity 0.18s ease;
+		}
+
+		body.is-menu-open .topbar__menu-toggle span:nth-child(1) {
+			transform: translateY(7px) rotate(45deg);
+		}
+
+		body.is-menu-open .topbar__menu-toggle span:nth-child(2) {
+			opacity: 0;
+		}
+
+		body.is-menu-open .topbar__menu-toggle span:nth-child(3) {
+			transform: translateY(-7px) rotate(-45deg);
+		}
+
+		.topbar__actions {
+			position: fixed;
+			top: 0;
+			left: 0;
+			right: 0;
+			z-index: 25;
+			display: grid;
+			gap: 8px;
+			padding: 14px 14px 18px;
+			background: linear-gradient(180deg, #1f1610 0%, #15100a 100%);
+			border-bottom: 1px solid var(--proto-line);
+			box-shadow: 0 12px 22px rgba(0, 0, 0, 0.55);
+			transform: translateY(-100%);
+			transition: transform 0.22s ease, visibility 0s linear 0.22s;
+			pointer-events: none;
+			visibility: hidden;
+		}
+
+		body.is-menu-open .topbar__actions {
+			transform: translateY(56px);
+			pointer-events: auto;
+			visibility: visible;
+			transition: transform 0.22s ease, visibility 0s linear 0s;
+		}
+
+		.topbar__actions .topbar__action {
+			width: 100%;
+			min-height: 46px;
+		}
+
+		.rail {
+			position: fixed;
+			top: 56px;
+			bottom: 0;
+			z-index: 20;
+			width: min(86vw, 340px);
+			max-height: none;
+			border: 0;
+			box-shadow: 0 0 30px rgba(0, 0, 0, 0.6);
+			transition: transform 0.22s ease;
+		}
+
+		.rail--left {
+			left: 0;
+			border-right: 1px solid var(--proto-line);
+			transform: translateX(-105%);
+		}
+
+		.rail--right {
+			right: 0;
+			border-left: 1px solid var(--proto-line);
+			transform: translateX(105%);
+		}
+
+		body.is-tools-open .rail--left {
+			transform: translateX(0);
+		}
+
+		body.is-inspector-open .rail--right {
+			transform: translateX(0);
+		}
+
+		.mobile-backdrop {
+			display: block;
+			position: fixed;
+			inset: 56px 0 0 0;
+			z-index: 15;
+			background: rgba(8, 4, 2, 0.55);
+			backdrop-filter: blur(2px);
+			opacity: 0;
+			pointer-events: none;
+			transition: opacity 0.2s ease;
+		}
+
+		body.is-menu-open .mobile-backdrop,
+		body.is-tools-open .mobile-backdrop,
+		body.is-inspector-open .mobile-backdrop {
+			opacity: 1;
+			pointer-events: auto;
+		}
+
+		.stage-shell {
+			grid-area: main;
+			min-height: 0;
+			padding: 12px 8px 8px;
+			overflow: hidden;
+		}
+
+		.stage__topbar {
+			gap: 8px;
+			margin-bottom: 8px;
+			padding: 0;
+		}
+
+		.stage__topbar .segment {
+			flex: 1 1 auto;
+			justify-content: center;
+		}
+
+		.stage__topbar .segment button {
+			min-height: 36px;
+			padding: 4px 10px;
+			font-size: 12px;
+		}
+
+		.stage__rail-toggle {
+			flex: 0 0 auto;
+			display: inline-flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			gap: 2px;
+			width: 56px;
+			min-width: 56px;
+			min-height: 44px;
+			padding: 4px;
+			border: 1px solid var(--proto-line);
+			border-radius: 4px;
+			background: linear-gradient(180deg, #221808 0%, #150d05 100%);
+			color: var(--proto-ink);
+			font-family: var(--font-ui);
+			font-size: 9px;
+			font-weight: 700;
+			letter-spacing: 0.5px;
+			text-transform: uppercase;
+			text-shadow: 0 1px 0 rgba(0, 0, 0, 0.55);
+			box-shadow: inset 0 1px 0 rgba(216, 168, 58, 0.08), 0 1px 0 rgba(0, 0, 0, 0.55);
+			cursor: pointer;
+		}
+
+		.stage__rail-toggle .stage__rail-icon {
+			font-size: 14px;
+			line-height: 1;
+			color: var(--proto-yellow);
+		}
+
+		.stage__rail-toggle[aria-pressed="true"] {
+			border-color: var(--proto-brass);
+			background: linear-gradient(180deg, #3a2a18 0%, #221708 100%);
+			color: #fbeac4;
 		}
 
 		.stage__hint {
 			display: none;
 		}
 
+		.stage-scroller {
+			padding: 8px 4px;
+		}
+
+		.stage__zoom {
+			right: 12px;
+			bottom: 56px;
+		}
+
 		.statusbar {
 			flex-direction: column;
+			gap: 4px;
+			font-size: 10px;
 		}
 	}
 </style>
