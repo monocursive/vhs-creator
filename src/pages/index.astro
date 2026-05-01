@@ -1,0 +1,1726 @@
+---
+---
+
+<html lang="fr">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" href="/favicon.ico" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+		<meta name="generator" content={Astro.generator} />
+		<title>VHS Studio - Jaquette imprimable</title>
+	</head>
+	<body>
+		<div class="noise"></div>
+		<div class="app-shell">
+			<header class="topbar">
+				<div>
+					<p class="kicker">Contre-Fictions / BosKop 2026</p>
+					<h1>VHS Studio</h1>
+				</div>
+				<div class="actions">
+					<button class="ghost" id="saveProject" type="button">Sauver</button>
+					<label class="ghost file-action">
+						Charger
+						<input id="loadProject" type="file" accept="application/json" />
+					</label>
+					<button class="primary" id="exportPng" type="button">PNG 300 dpi</button>
+					<button class="primary hot" id="exportPdf" type="button">PDF print</button>
+				</div>
+			</header>
+
+			<main class="workspace">
+				<aside class="panel tools-panel" aria-label="Outils de jaquette">
+					<section>
+						<div class="panel-title">
+							<span>Placement</span>
+							<small>258 x 194 mm</small>
+						</div>
+						<div class="segment" role="group" aria-label="Zone cible">
+							<button class="active" data-zone="front" type="button">Recto</button>
+							<button data-zone="back" type="button">Verso</button>
+							<button data-zone="spine" type="button">Tranche</button>
+						</div>
+					</section>
+
+					<section>
+						<div class="panel-title">
+							<span>Ajouter</span>
+							<small id="assetCount"></small>
+						</div>
+						<div class="tool-grid">
+							<button id="addTitle" type="button">Titre</button>
+							<button id="addText" type="button">Texte</button>
+							<button id="addBox" type="button">Bloc</button>
+							<label class="upload-button">
+								Image
+								<input id="imageUpload" type="file" accept="image/*" multiple />
+							</label>
+						</div>
+					</section>
+
+					<section>
+						<div class="panel-title">
+							<span>Ambiances</span>
+						</div>
+						<div class="theme-grid">
+							<button data-theme="neon" type="button">Neon</button>
+							<button data-theme="noir" type="button">Noir</button>
+							<button data-theme="cosmic" type="button">Cosmic</button>
+							<button data-theme="rental" type="button">Rental</button>
+						</div>
+					</section>
+
+					<section>
+						<div class="panel-title">
+							<span>Logos</span>
+							<small>glisser-déposer</small>
+						</div>
+						<div class="asset-tray" id="assetTray" aria-label="Bibliothèque de logos"></div>
+					</section>
+				</aside>
+
+				<section class="stage-wrap" aria-label="Zone de création">
+					<div class="stage-toolbar">
+						<div class="measure-strip">
+							<span>Verso 114 mm</span>
+							<span>Tranche 30 mm</span>
+							<span>Recto 114 mm</span>
+						</div>
+						<div class="compact-actions">
+							<button id="fitZoom" type="button">Fit</button>
+							<label class="guide-toggle">
+								<input id="toggleGuides" type="checkbox" checked />
+								Guides
+							</label>
+						</div>
+					</div>
+					<div class="stage-scroller" id="stageScroller">
+						<div class="stage" id="dropStage">
+							<canvas id="coverCanvas" aria-label="Prévisualisation de la jaquette VHS"></canvas>
+						</div>
+					</div>
+					<div class="statusbar" id="statusbar">
+						<span>Sélectionne un élément : déplacer au doigt/souris, poignées pour redimensionner, pastille jaune pour tourner.</span>
+						<span>Double-clic sur la jaquette : ajouter un texte.</span>
+					</div>
+				</section>
+
+				<aside class="panel inspector-panel" aria-label="Inspecteur">
+					<section>
+						<div class="panel-title">
+							<span>Calque</span>
+							<small id="selectedLabel">aucun</small>
+						</div>
+						<div class="layer-actions">
+							<button id="bringForward" type="button">Monter</button>
+							<button id="sendBackward" type="button">Descendre</button>
+							<button id="duplicateLayer" type="button">Dupliquer</button>
+							<button id="deleteLayer" class="danger" type="button">Supprimer</button>
+						</div>
+					</section>
+
+					<section class="inspector" id="inspector">
+						<label>
+							Texte
+							<textarea id="textContent" rows="4"></textarea>
+						</label>
+						<div class="split">
+							<label>
+								Police
+								<select id="fontFamily">
+									<optgroup label="Kit BosKop / local">
+										<option value="SF Movie Poster Condensed, Impact, sans-serif">SF Movie Poster Condensed</option>
+										<option value="SF Movie Poster, Impact, sans-serif">SF Movie Poster</option>
+										<option value="Bee Two, Georgia, serif">Bee Two</option>
+									</optgroup>
+									<optgroup label="Titres VHS / SF">
+										<option value="Michroma, Eurostile, sans-serif">Michroma - Eurostile vibe</option>
+										<option value="Orbitron, Eurostile, sans-serif">Orbitron - space tech</option>
+										<option value="Audiowide, Eurostile, sans-serif">Audiowide - video club</option>
+										<option value="Bungee, Impact, sans-serif">Bungee - gros titre</option>
+										<option value="Bungee Inline, Impact, sans-serif">Bungee Inline - néon</option>
+										<option value="Monoton, Impact, sans-serif">Monoton - enseigne VHS</option>
+										<option value="Creepster, Georgia, serif">Creepster - horreur</option>
+										<option value="Bebas Neue, Impact, sans-serif">Bebas Neue - affiche</option>
+										<option value="Anton, Impact, sans-serif">Anton - action</option>
+									</optgroup>
+									<optgroup label="Textes / crédits">
+										<option value="Roboto Condensed, Arial Narrow, sans-serif">Roboto Condensed</option>
+										<option value="Oswald, Arial Narrow, sans-serif">Oswald</option>
+										<option value="Archivo Black, Arial Black, sans-serif">Archivo Black</option>
+										<option value="Special Elite, Courier New, monospace">Special Elite</option>
+										<option value="Courier Prime, Courier New, monospace">Courier Prime</option>
+										<option value="Georgia, serif">Georgia</option>
+										<option value="Arial, sans-serif">Arial</option>
+									</optgroup>
+								</select>
+							</label>
+							<label>
+								Taille
+								<input id="fontSize" type="range" min="2" max="28" step="0.5" />
+							</label>
+						</div>
+						<div class="split">
+							<label>
+								Couleur
+								<input id="fillColor" type="color" />
+							</label>
+							<label>
+								Opacité
+								<input id="opacity" type="range" min="0.1" max="1" step="0.05" />
+							</label>
+						</div>
+						<div class="split">
+							<label>
+								Rotation
+								<input id="rotation" type="range" min="-180" max="180" step="1" />
+							</label>
+							<label>
+								Alignement
+								<select id="textAlign">
+									<option value="left">Gauche</option>
+									<option value="center">Centre</option>
+									<option value="right">Droite</option>
+								</select>
+							</label>
+						</div>
+						<div class="split image-controls">
+							<label>
+								Image
+								<select id="imageFit">
+									<option value="contain">Tout voir</option>
+									<option value="cover">Remplir</option>
+								</select>
+							</label>
+							<button id="replaceImage" type="button">Remplacer</button>
+						</div>
+						<div class="position-grid">
+							<label>X <input id="posX" type="number" step="1" /></label>
+							<label>Y <input id="posY" type="number" step="1" /></label>
+							<label>L <input id="posW" type="number" step="1" /></label>
+							<label>H <input id="posH" type="number" step="1" /></label>
+						</div>
+						<input id="replaceImageInput" type="file" accept="image/*" hidden />
+					</section>
+
+					<section>
+						<div class="panel-title">
+							<span>Export</span>
+						</div>
+						<div class="print-spec">
+							<div><strong>Jaquette</strong><span>258 x 194 mm</span></div>
+							<div><strong>Recto</strong><span>114 x 194 mm</span></div>
+							<div><strong>Verso</strong><span>114 x 194 mm</span></div>
+							<div><strong>Tranche</strong><span>30 x 194 mm</span></div>
+						</div>
+					</section>
+				</aside>
+			</main>
+		</div>
+	</body>
+</html>
+
+<script>
+	import { jsPDF } from "jspdf";
+
+	const COVER = { w: 258, h: 194 };
+	const ZONES = {
+		back: { x: 0, y: 0, w: 114, h: 194 },
+		spine: { x: 114, y: 0, w: 30, h: 194 },
+		front: { x: 144, y: 0, w: 114, h: 194 },
+	};
+	const A4 = { w: 297, h: 210 };
+	const PRINT_SCALE = 300 / 25.4;
+	const EXPORT_W = Math.round(COVER.w * PRINT_SCALE);
+	const EXPORT_H = Math.round(COVER.h * PRINT_SCALE);
+
+	const assets = [
+		{ label: "VHS", src: "/VHS%20LOGO/vhs-2-logo-png-transparent.png" },
+		{ label: "VHS old", src: "/VHS%20LOGO/VHS%20old%20style%20%20-%20transparent.png" },
+		{ label: "VHS noir", src: "/VHS%20LOGO/VHS%20LOGO%20noir%20-%20transparent.png" },
+		{ label: "SECAM", src: "/VHS%20LOGO/Logo%20VHS%20SECAM%20-%20transparent.png" },
+		{ label: "Dolby", src: "/Logo%20AUDIO/Dolby_Surround_Logo-font-transparent.png" },
+		{ label: "Dolby long", src: "/Logo%20AUDIO/dolby_surround_stereo_logo__1985_2001__by_ulises21998_dgrr85n-fullview.png" },
+		{ label: "Hi-Fi", src: "/Logo%20AUDIO/Logo%20HIFI%20-%20transparent.png" },
+		{ label: "THX", src: "/Logo%20AUDIO/THX_fond-transparent.png" },
+		{ label: "CinemaScope", src: "/Logo%20Cinemascope/cinemascope-logo-png_transparentpng.png" },
+		{ label: "Tous publics", src: "/Logos%20Interdictions%20Ages/Tous%20publics.png" },
+		{ label: "-12", src: "/Logos%20Interdictions%20Ages/Interdit-12ans.png" },
+		{ label: "-16", src: "/Logos%20Interdictions%20Ages/Interdit-16ans.png" },
+		{ label: "Accord parental", src: "/Logos%20Interdictions%20Ages/Accord%20Parental.png" },
+	];
+
+	const canvas = document.querySelector("#coverCanvas");
+	const ctx = canvas.getContext("2d");
+	const stage = document.querySelector("#dropStage");
+	const stageScroller = document.querySelector("#stageScroller");
+	const assetTray = document.querySelector("#assetTray");
+	const statusbar = document.querySelector("#statusbar");
+	const selectedLabel = document.querySelector("#selectedLabel");
+	const inspector = document.querySelector("#inspector");
+	const assetCount = document.querySelector("#assetCount");
+	const saveProject = document.querySelector("#saveProject");
+	const loadProject = document.querySelector("#loadProject");
+	const exportPng = document.querySelector("#exportPng");
+	const exportPdf = document.querySelector("#exportPdf");
+	const addTitle = document.querySelector("#addTitle");
+	const addTextButton = document.querySelector("#addText");
+	const addBox = document.querySelector("#addBox");
+	const imageUpload = document.querySelector("#imageUpload");
+	const toggleGuides = document.querySelector("#toggleGuides");
+	const fitZoom = document.querySelector("#fitZoom");
+	const textContent = document.querySelector("#textContent");
+	const fontFamily = document.querySelector("#fontFamily");
+	const fontSize = document.querySelector("#fontSize");
+	const fillColor = document.querySelector("#fillColor");
+	const opacity = document.querySelector("#opacity");
+	const rotation = document.querySelector("#rotation");
+	const textAlign = document.querySelector("#textAlign");
+	const imageFit = document.querySelector("#imageFit");
+	const replaceImage = document.querySelector("#replaceImage");
+	const replaceImageInput = document.querySelector("#replaceImageInput");
+	const posX = document.querySelector("#posX");
+	const posY = document.querySelector("#posY");
+	const posW = document.querySelector("#posW");
+	const posH = document.querySelector("#posH");
+	const bringForward = document.querySelector("#bringForward");
+	const sendBackward = document.querySelector("#sendBackward");
+	const duplicateLayer = document.querySelector("#duplicateLayer");
+	const deleteLayer = document.querySelector("#deleteLayer");
+
+	let activeZone = "front";
+	let selectedId = null;
+	let pointerMode = null;
+	let dragState = null;
+	let showGuides = true;
+	let raf = 0;
+	let currentScale = 1;
+	const imageCache = new Map();
+
+	const project = {
+		name: "contre-fictions-vhs",
+		background: "#0a0612",
+		objects: [
+			rect("Fond verso", 0, 0, 114, 194, "#050506", true),
+			rect("Fond tranche", 114, 0, 30, 194, "#17394d", true),
+			rect("Fond recto", 144, 0, 114, 194, "#7895bd", true),
+			rect("Liseré magenta", 151, 8, 100, 5, "#ff2dd4"),
+			rect("Bande cyan", 151, 14, 100, 3, "#21f7ff"),
+			text("Titre", "NEON\nSATURNE", 153, 28, 96, 44, 17, "#fff7ad", "center", "Bungee, Impact, sans-serif"),
+			text("Accroche", "Un faux film de science-fiction\npour une vraie VHS-thèque.", 154, 68, 94, 18, 5, "#101020", "center", "Roboto Condensed, Arial Narrow, sans-serif"),
+			text("Verso synopsis", "SYNOPSIS\nEn 1986, une station orbitale capte un signal pirate venu d'une cassette impossible. Une équipe de techniciennes rembobine le futur avant que la Terre ne passe en mode neige.", 10, 20, 94, 60, 5.4, "#f9f5ff", "left", "Roboto Condensed, Arial Narrow, sans-serif"),
+			rect("Photo A", 10, 88, 42, 30, "#203c6d"),
+			rect("Photo B", 62, 88, 42, 30, "#7b245f"),
+			text("Critique", "\"Le choc cosmique de l'année.\" - VHS 3000", 10, 127, 94, 18, 5, "#ffec62", "center", "Georgia, serif"),
+			text("Crédits", "AVEC NOVA STERLING  KIM VECTOR  REALISATION M. LUMIERE  MUSIQUE SYNTH WAVE  DUREE 1H34", 10, 168, 94, 14, 3.3, "#ffffff", "center", "SF Movie Poster Condensed, Impact, sans-serif"),
+			text("Tranche", "NEON SATURNE", 54, 89.5, 150, 15, 8.5, "#ffffff", "center", "Michroma, Eurostile, sans-serif", -90),
+		],
+	};
+
+	function makeId() {
+		return `layer-${Math.random().toString(36).slice(2, 9)}`;
+	}
+
+	function rect(name, x, y, w, h, fill, locked = false) {
+		return { id: makeId(), type: "rect", name, x, y, w, h, fill, stroke: "transparent", opacity: 1, rotation: 0, locked };
+	}
+
+	function text(name, content, x, y, w, h, fontSize, fill, align, fontFamily, rotation = 0) {
+		return { id: makeId(), type: "text", name, content, x, y, w, h, fontSize, fill, align, fontFamily, opacity: 1, rotation, locked: false };
+	}
+
+	function image(name, src, x, y, w, h) {
+		void loadImage(src);
+		return { id: makeId(), type: "image", name, src, x, y, w, h, opacity: 1, rotation: 0, fit: "contain", locked: false };
+	}
+
+	function zoneCenter(zoneName, size) {
+		const zone = ZONES[zoneName];
+		return {
+			x: zone.x + (zone.w - size.w) / 2,
+			y: zone.y + (zone.h - size.h) / 2,
+		};
+	}
+
+	function scheduleRender() {
+		if (raf) return;
+		raf = requestAnimationFrame(() => {
+			raf = 0;
+			render();
+		});
+	}
+
+	function setupCanvasSize() {
+		const box = stage.getBoundingClientRect();
+		const maxWidth = Math.max(320, box.width);
+		const cssW = Math.min(maxWidth, 1180);
+		const cssH = cssW * (COVER.h / COVER.w);
+		const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+		canvas.style.width = `${cssW}px`;
+		canvas.style.height = `${cssH}px`;
+		canvas.width = Math.round(cssW * dpr);
+		canvas.height = Math.round(cssH * dpr);
+		currentScale = canvas.width / COVER.w;
+		render();
+	}
+
+	function render(targetCanvas = canvas, opts = {}) {
+		const targetCtx = targetCanvas.getContext("2d");
+		const scale = targetCanvas.width / COVER.w;
+		targetCtx.clearRect(0, 0, targetCanvas.width, targetCanvas.height);
+		drawBackdrop(targetCtx, scale);
+		for (const object of project.objects) drawObject(targetCtx, object, scale);
+		if (opts.guides !== false && showGuides) drawGuides(targetCtx, scale);
+		if (targetCanvas === canvas && selectedId) drawSelection(targetCtx, getSelected(), scale);
+	}
+
+	function drawBackdrop(targetCtx, scale) {
+		targetCtx.save();
+		targetCtx.fillStyle = project.background;
+		targetCtx.fillRect(0, 0, COVER.w * scale, COVER.h * scale);
+		targetCtx.globalAlpha = 0.16;
+		for (let y = 0; y < COVER.h; y += 2.2) {
+			targetCtx.fillStyle = y % 4.4 < 2.2 ? "#ffffff" : "#000000";
+			targetCtx.fillRect(0, y * scale, COVER.w * scale, 0.45 * scale);
+		}
+		targetCtx.restore();
+	}
+
+	function drawObject(targetCtx, object, scale) {
+		targetCtx.save();
+		targetCtx.globalAlpha = object.opacity ?? 1;
+		const cx = (object.x + object.w / 2) * scale;
+		const cy = (object.y + object.h / 2) * scale;
+		targetCtx.translate(cx, cy);
+		targetCtx.rotate(((object.rotation || 0) * Math.PI) / 180);
+		targetCtx.translate((-object.w * scale) / 2, (-object.h * scale) / 2);
+
+		if (object.type === "rect") {
+			targetCtx.fillStyle = object.fill;
+			targetCtx.fillRect(0, 0, object.w * scale, object.h * scale);
+			if (object.stroke && object.stroke !== "transparent") {
+				targetCtx.strokeStyle = object.stroke;
+				targetCtx.lineWidth = Math.max(1, 0.4 * scale);
+				targetCtx.strokeRect(0, 0, object.w * scale, object.h * scale);
+			}
+		}
+
+		if (object.type === "image") {
+			const img = imageCache.get(object.src);
+			if (img?.complete) {
+				drawFittedImage(targetCtx, img, object.w * scale, object.h * scale, object.fit || "contain");
+			} else {
+				targetCtx.fillStyle = "#111";
+				targetCtx.fillRect(0, 0, object.w * scale, object.h * scale);
+				targetCtx.strokeStyle = "#ff2dd4";
+				targetCtx.strokeRect(0, 0, object.w * scale, object.h * scale);
+			}
+		}
+
+		if (object.type === "text") {
+			drawText(targetCtx, object, scale);
+		}
+		targetCtx.restore();
+	}
+
+	function drawFittedImage(targetCtx, img, w, h, fit) {
+		const imageRatio = img.naturalWidth / img.naturalHeight;
+		const boxRatio = w / h;
+		let dw = w;
+		let dh = h;
+		let dx = 0;
+		let dy = 0;
+		if (fit === "cover" ? imageRatio > boxRatio : imageRatio < boxRatio) {
+			dh = fit === "cover" ? h : w / imageRatio;
+			dw = fit === "cover" ? h * imageRatio : w;
+			dx = (w - dw) / 2;
+			dy = (h - dh) / 2;
+		} else {
+			dw = fit === "cover" ? w : h * imageRatio;
+			dh = fit === "cover" ? w / imageRatio : h;
+			dx = (w - dw) / 2;
+			dy = (h - dh) / 2;
+		}
+		targetCtx.drawImage(img, dx, dy, dw, dh);
+	}
+
+	function drawText(targetCtx, object, scale) {
+		const size = object.fontSize * scale;
+		const lineHeight = size * 1.08;
+		targetCtx.fillStyle = object.fill;
+		targetCtx.font = `900 ${size}px ${object.fontFamily}`;
+		targetCtx.textAlign = object.align || "left";
+		targetCtx.textBaseline = "top";
+		const maxWidth = object.w * scale;
+		const x = object.align === "center" ? maxWidth / 2 : object.align === "right" ? maxWidth : 0;
+		const lines = wrapText(targetCtx, object.content || "", maxWidth);
+		lines.slice(0, Math.max(1, Math.ceil((object.h * scale) / lineHeight))).forEach((line, index) => {
+			targetCtx.fillText(line, x, index * lineHeight);
+		});
+	}
+
+	function wrapText(targetCtx, textValue, maxWidth) {
+		const hardLines = String(textValue).split("\n");
+		const lines = [];
+		for (const hardLine of hardLines) {
+			const words = hardLine.split(/\s+/).filter(Boolean);
+			if (!words.length) {
+				lines.push("");
+				continue;
+			}
+			let line = "";
+			for (const word of words) {
+				const next = line ? `${line} ${word}` : word;
+				if (targetCtx.measureText(next).width <= maxWidth || !line) {
+					line = next;
+				} else {
+					lines.push(line);
+					line = word;
+				}
+			}
+			lines.push(line);
+		}
+		return lines;
+	}
+
+	function drawGuides(targetCtx, scale) {
+		targetCtx.save();
+		targetCtx.strokeStyle = "#ff3434";
+		targetCtx.lineWidth = Math.max(1, 0.35 * scale);
+		targetCtx.strokeRect(0.4 * scale, 0.4 * scale, (COVER.w - 0.8) * scale, (COVER.h - 0.8) * scale);
+		targetCtx.setLineDash([4 * scale, 2.5 * scale]);
+		targetCtx.strokeStyle = "rgba(255,255,255,0.62)";
+		targetCtx.beginPath();
+		targetCtx.moveTo(ZONES.spine.x * scale, 0);
+		targetCtx.lineTo(ZONES.spine.x * scale, COVER.h * scale);
+		targetCtx.moveTo((ZONES.spine.x + ZONES.spine.w) * scale, 0);
+		targetCtx.lineTo((ZONES.spine.x + ZONES.spine.w) * scale, COVER.h * scale);
+		targetCtx.stroke();
+		targetCtx.setLineDash([]);
+		targetCtx.fillStyle = "rgba(255,255,255,0.84)";
+		targetCtx.font = `700 ${Math.max(9, 2.8 * scale)}px Arial`;
+		targetCtx.fillText("VERSO", 3 * scale, 5 * scale);
+		targetCtx.fillText("TRANCHE", 116 * scale, 5 * scale);
+		targetCtx.fillText("RECTO", 147 * scale, 5 * scale);
+		targetCtx.restore();
+	}
+
+	function drawSelection(targetCtx, object, scale) {
+		if (!object) return;
+		const cx = (object.x + object.w / 2) * scale;
+		const cy = (object.y + object.h / 2) * scale;
+		targetCtx.save();
+		targetCtx.translate(cx, cy);
+		targetCtx.rotate(degToRad(object.rotation || 0));
+		targetCtx.translate((-object.w * scale) / 2, (-object.h * scale) / 2);
+		targetCtx.strokeStyle = "#fff365";
+		targetCtx.lineWidth = Math.max(1.5, 0.45 * scale);
+		targetCtx.setLineDash([5, 4]);
+		targetCtx.strokeRect(0, 0, object.w * scale, object.h * scale);
+		targetCtx.setLineDash([]);
+		targetCtx.restore();
+
+		const handles = getHandles(object);
+		const top = handles.find((handle) => handle.name === "n");
+		const rotate = handles.find((handle) => handle.name === "rotate");
+		targetCtx.save();
+		targetCtx.lineWidth = 2;
+		targetCtx.strokeStyle = "#fff365";
+		targetCtx.beginPath();
+		targetCtx.moveTo(top.x * scale, top.y * scale);
+		targetCtx.lineTo(rotate.x * scale, rotate.y * scale);
+		targetCtx.stroke();
+		for (const handle of handles) {
+			targetCtx.fillStyle = handle.type === "rotate" ? "#fff365" : "#0c0614";
+			targetCtx.strokeStyle = handle.type === "rotate" ? "#160b22" : "#21f7ff";
+			targetCtx.lineWidth = 2;
+			targetCtx.beginPath();
+			if (handle.type === "rotate") {
+				targetCtx.arc(handle.x * scale, handle.y * scale, 7, 0, Math.PI * 2);
+			} else {
+				targetCtx.rect(handle.x * scale - 6, handle.y * scale - 6, 12, 12);
+			}
+			targetCtx.fill();
+			targetCtx.stroke();
+		}
+		targetCtx.restore();
+	}
+
+	function getHandles(object) {
+		const locals = [
+			{ name: "nw", x: 0, y: 0, type: "resize", cursor: "nwse-resize" },
+			{ name: "n", x: object.w / 2, y: 0, type: "resize", cursor: "ns-resize" },
+			{ name: "ne", x: object.w, y: 0, type: "resize", cursor: "nesw-resize" },
+			{ name: "e", x: object.w, y: object.h / 2, type: "resize", cursor: "ew-resize" },
+			{ name: "se", x: object.w, y: object.h, type: "resize", cursor: "nwse-resize" },
+			{ name: "s", x: object.w / 2, y: object.h, type: "resize", cursor: "ns-resize" },
+			{ name: "sw", x: 0, y: object.h, type: "resize", cursor: "nesw-resize" },
+			{ name: "w", x: 0, y: object.h / 2, type: "resize", cursor: "ew-resize" },
+			{ name: "rotate", x: object.w / 2, y: -14, type: "rotate", cursor: "grab" },
+		];
+		return locals.map((handle) => ({ ...handle, ...localToWorld(object, handle) }));
+	}
+
+	function loadImage(src) {
+		if (imageCache.has(src)) return Promise.resolve(imageCache.get(src));
+		return new Promise((resolve, reject) => {
+			const img = new Image();
+			img.onload = () => {
+				imageCache.set(src, img);
+				scheduleRender();
+				resolve(img);
+			};
+			img.onerror = reject;
+			img.src = src;
+			imageCache.set(src, img);
+		});
+	}
+
+	function canvasPoint(event) {
+		const rect = canvas.getBoundingClientRect();
+		return {
+			x: ((event.clientX - rect.left) / rect.width) * COVER.w,
+			y: ((event.clientY - rect.top) / rect.height) * COVER.h,
+		};
+	}
+
+	function degToRad(degrees) {
+		return (degrees * Math.PI) / 180;
+	}
+
+	function radToDeg(radians) {
+		return (radians * 180) / Math.PI;
+	}
+
+	function normalizeAngle(degrees) {
+		let angle = ((degrees + 180) % 360) - 180;
+		if (angle < -180) angle += 360;
+		return angle;
+	}
+
+	function rotatePoint(point, angle) {
+		const cos = Math.cos(angle);
+		const sin = Math.sin(angle);
+		return {
+			x: point.x * cos - point.y * sin,
+			y: point.x * sin + point.y * cos,
+		};
+	}
+
+	function objectCenter(object) {
+		return { x: object.x + object.w / 2, y: object.y + object.h / 2 };
+	}
+
+	function localToWorld(object, local) {
+		const center = objectCenter(object);
+		const rotated = rotatePoint({ x: local.x - object.w / 2, y: local.y - object.h / 2 }, degToRad(object.rotation || 0));
+		return { x: center.x + rotated.x, y: center.y + rotated.y };
+	}
+
+	function worldToLocal(point, object) {
+		const center = objectCenter(object);
+		const rotated = rotatePoint({ x: point.x - center.x, y: point.y - center.y }, -degToRad(object.rotation || 0));
+		return { x: rotated.x + object.w / 2, y: rotated.y + object.h / 2 };
+	}
+
+	function hitTest(point) {
+		for (let i = project.objects.length - 1; i >= 0; i--) {
+			const object = project.objects[i];
+			if (object.locked) continue;
+			const local = worldToLocal(point, object);
+			if (local.x >= 0 && local.x <= object.w && local.y >= 0 && local.y <= object.h) return object;
+		}
+		return null;
+	}
+
+	function hitHandle(point) {
+		const selected = getSelected();
+		if (!selected) return null;
+		const threshold = 13 / currentScale;
+		return getHandles(selected).find((handle) => Math.hypot(point.x - handle.x, point.y - handle.y) < threshold);
+	}
+
+	function getSelected() {
+		return project.objects.find((object) => object.id === selectedId) || null;
+	}
+
+	function selectObject(id) {
+		selectedId = id;
+		updateInspector();
+		scheduleRender();
+	}
+
+	function updateInspector() {
+		const object = getSelected();
+		selectedLabel.textContent = object ? object.name : "aucun";
+		inspector.classList.toggle("empty", !object);
+		const textControls = [textContent, fontFamily, fontSize, textAlign];
+		textControls.forEach((control) => {
+			control.disabled = !object || object.type !== "text";
+		});
+		imageFit.disabled = !object || object.type !== "image";
+		replaceImage.disabled = !object || object.type !== "image";
+		if (!object) return;
+		textContent.value = object.type === "text" ? object.content : "";
+		fontFamily.value = object.fontFamily || "Arial, sans-serif";
+		fontSize.value = object.fontSize || 8;
+		fillColor.value = object.fill || "#ffffff";
+		opacity.value = object.opacity ?? 1;
+		rotation.value = object.rotation || 0;
+		textAlign.value = object.align || "left";
+		imageFit.value = object.fit || "contain";
+		posX.value = Math.round(object.x);
+		posY.value = Math.round(object.y);
+		posW.value = Math.round(object.w);
+		posH.value = Math.round(object.h);
+	}
+
+	function updateSelected(mutator) {
+		const object = getSelected();
+		if (!object) return;
+		mutator(object);
+		updateInspector();
+		scheduleRender();
+	}
+
+	function addObject(object) {
+		project.objects.push(object);
+		selectObject(object.id);
+		setStatus(`${object.name} ajouté.`);
+	}
+
+	function addTextLayer(kind) {
+		const size = kind === "title" ? { w: 88, h: 26 } : { w: 86, h: 36 };
+		const pos = zoneCenter(activeZone, size);
+		addObject(
+			text(
+				kind === "title" ? "Titre" : "Texte",
+				kind === "title" ? "TITRE DU FILM" : "Synopsis, casting, durée, copyright...",
+				pos.x,
+				pos.y,
+				size.w,
+				size.h,
+				kind === "title" ? 13 : 5,
+				kind === "title" ? "#fff365" : "#ffffff",
+				kind === "title" ? "center" : "left",
+				kind === "title" ? "Bungee, Impact, sans-serif" : "Roboto Condensed, Arial Narrow, sans-serif",
+			),
+		);
+	}
+
+	function addTextAt(point) {
+		const size = { w: 70, h: 26 };
+		addObject(
+			text(
+				"Texte libre",
+				"NOUVEAU TEXTE",
+				clamp(point.x - size.w / 2, 0, COVER.w - size.w),
+				clamp(point.y - size.h / 2, 0, COVER.h - size.h),
+				size.w,
+				size.h,
+				7,
+				"#ffffff",
+				"center",
+				"Bungee, Impact, sans-serif",
+			),
+		);
+		textContent.focus();
+		textContent.select();
+	}
+
+	function addRect() {
+		const size = activeZone === "spine" ? { w: 18, h: 52 } : { w: 54, h: 34 };
+		const pos = zoneCenter(activeZone, size);
+		addObject(rect("Bloc couleur", pos.x, pos.y, size.w, size.h, "#ff2dd4"));
+	}
+
+	function addAsset(src, name = "Image", point = null) {
+		const size = activeZone === "spine" ? { w: 18, h: 18 } : { w: 28, h: 16 };
+		const pos = point ? { x: point.x - size.w / 2, y: point.y - size.h / 2 } : zoneCenter(activeZone, size);
+		addObject(image(name, src, clamp(pos.x, 0, COVER.w - size.w), clamp(pos.y, 0, COVER.h - size.h), size.w, size.h));
+	}
+
+	function addImportedImage(src, name = "Image importée", point = null) {
+		const zoneName = activeZone;
+		const zone = ZONES[zoneName];
+		const size = zoneName === "spine" ? { w: 24, h: 32 } : { w: Math.min(86, zone.w - 12), h: 62 };
+		const pos = point ? { x: point.x - size.w / 2, y: point.y - size.h / 2 } : zoneCenter(activeZone, size);
+		const object = image(name, src, clamp(pos.x, 0, COVER.w - size.w), clamp(pos.y, 0, COVER.h - size.h), size.w, size.h);
+		addObject(object);
+		loadImage(src)
+			.then((img) => {
+				const ratio = img.naturalWidth / img.naturalHeight;
+				const maxW = zoneName === "spine" ? 24 : Math.min(92, zone.w - 10);
+				const maxH = zoneName === "spine" ? 130 : Math.min(130, zone.h - 16);
+				const byWidth = { w: maxW, h: maxW / ratio };
+				const next = byWidth.h <= maxH ? byWidth : { w: maxH * ratio, h: maxH };
+				object.w = next.w;
+				object.h = next.h;
+				object.x = clamp(point ? point.x - object.w / 2 : zone.x + (zone.w - object.w) / 2, 0, COVER.w - object.w);
+				object.y = clamp(point ? point.y - object.h / 2 : zone.y + (zone.h - object.h) / 2, 0, COVER.h - object.h);
+				updateInspector();
+				scheduleRender();
+			})
+			.catch(() => setStatus("Image impossible à charger."));
+	}
+
+	function applyTheme(theme) {
+		const [back, spine, front] = project.objects.slice(0, 3);
+		const themes = {
+			neon: ["#050506", "#17394d", "#7895bd"],
+			noir: ["#09090d", "#111111", "#19151f"],
+			cosmic: ["#15082f", "#47145c", "#0b6f94"],
+			rental: ["#f2e9cf", "#f43f5e", "#1f2937"],
+		};
+		[back.fill, spine.fill, front.fill] = themes[theme];
+		project.background = themes[theme][0];
+		setStatus(`Ambiance ${theme}.`);
+		scheduleRender();
+	}
+
+	function clamp(value, min, max) {
+		return Math.min(Math.max(value, min), max);
+	}
+
+	function setStatus(message) {
+		statusbar.firstElementChild.textContent = message;
+	}
+
+	function downloadBlob(blob, filename) {
+		const url = URL.createObjectURL(blob);
+		const link = document.createElement("a");
+		link.href = url;
+		link.download = filename;
+		link.click();
+		URL.revokeObjectURL(url);
+	}
+
+	async function renderExportCanvas() {
+		await Promise.all(project.objects.filter((object) => object.type === "image").map((object) => loadImage(object.src).catch(() => null)));
+		const exportCanvas = document.createElement("canvas");
+		exportCanvas.width = EXPORT_W;
+		exportCanvas.height = EXPORT_H;
+		render(exportCanvas, { guides: false });
+		return exportCanvas;
+	}
+
+	async function exportPngFile() {
+		setStatus("Export PNG en cours...");
+		const exportCanvas = await renderExportCanvas();
+		exportCanvas.toBlob((blob) => {
+			if (blob) downloadBlob(blob, "jaquette-vhs-258x194mm-300dpi.png");
+			setStatus("PNG 300 dpi exporté.");
+		}, "image/png");
+	}
+
+	async function exportPdfFile() {
+		setStatus("Préparation du PDF A4...");
+		const exportCanvas = await renderExportCanvas();
+		const pdf = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4", compress: true });
+		const x = (A4.w - COVER.w) / 2;
+		const y = (A4.h - COVER.h) / 2;
+		pdf.setFillColor(255, 255, 255);
+		pdf.rect(0, 0, A4.w, A4.h, "F");
+		pdf.addImage(exportCanvas.toDataURL("image/png"), "PNG", x, y, COVER.w, COVER.h);
+		drawPdfGuides(pdf, x, y);
+		pdf.save("jaquette-vhs-a4-print.pdf");
+		setStatus("PDF A4 exporté.");
+	}
+
+	function drawPdfGuides(pdf, x, y) {
+		pdf.setDrawColor(255, 52, 52);
+		pdf.setLineWidth(0.25);
+		pdf.rect(x, y, COVER.w, COVER.h);
+		pdf.setDrawColor(0, 0, 0);
+		pdf.setLineWidth(0.18);
+		const mark = 6;
+		const corners = [
+			[x, y, -1, -1],
+			[x + COVER.w, y, 1, -1],
+			[x, y + COVER.h, -1, 1],
+			[x + COVER.w, y + COVER.h, 1, 1],
+		];
+		for (const [cx, cy, sx, sy] of corners) {
+			pdf.line(cx, cy + sy * 2, cx, cy + sy * mark);
+			pdf.line(cx + sx * 2, cy, cx + sx * mark, cy);
+		}
+		pdf.setDrawColor(40, 40, 40);
+		pdf.setLineDashPattern([2, 1.5], 0);
+		pdf.line(x + 114, y, x + 114, y + COVER.h);
+		pdf.line(x + 144, y, x + 144, y + COVER.h);
+		pdf.setLineDashPattern([], 0);
+	}
+
+	function wireAssets() {
+		assetTray.innerHTML = assets
+			.map(
+				(asset) => `
+					<button class="asset" type="button" draggable="true" data-src="${asset.src}" title="${asset.label}">
+						<img src="${asset.src}" alt="" loading="lazy" />
+						<span>${asset.label}</span>
+					</button>
+				`,
+			)
+			.join("");
+		assetCount.textContent = `${assets.length} assets`;
+		assetTray.querySelectorAll(".asset").forEach((button) => {
+			button.addEventListener("click", () => addAsset(button.dataset.src, button.title));
+			button.addEventListener("dragstart", (event) => {
+				event.dataTransfer.setData("text/plain", button.dataset.src);
+			});
+		});
+	}
+
+	function wireEvents() {
+		document.querySelectorAll(".segment button").forEach((button) => {
+			button.addEventListener("click", () => {
+				document.querySelector(".segment .active").classList.remove("active");
+				button.classList.add("active");
+				activeZone = button.dataset.zone;
+			});
+		});
+
+		document.querySelectorAll("[data-theme]").forEach((button) => button.addEventListener("click", () => applyTheme(button.dataset.theme)));
+		addTitle.addEventListener("click", () => addTextLayer("title"));
+		addTextButton.addEventListener("click", () => addTextLayer("body"));
+		addBox.addEventListener("click", addRect);
+		imageUpload.addEventListener("change", (event) => handleFiles(event.target.files));
+		toggleGuides.addEventListener("change", () => {
+			showGuides = toggleGuides.checked;
+			scheduleRender();
+		});
+		fitZoom.addEventListener("click", () => stageScroller.scrollTo({ left: 0, top: 0, behavior: "smooth" }));
+		exportPng.addEventListener("click", exportPngFile);
+		exportPdf.addEventListener("click", exportPdfFile);
+		saveProject.addEventListener("click", saveProjectFile);
+		loadProject.addEventListener("change", loadProjectFile);
+
+		for (const control of [textContent, fontFamily, fontSize, fillColor, opacity, rotation, textAlign, imageFit, posX, posY, posW, posH]) {
+			control.addEventListener("input", applyInspectorChange);
+		}
+		replaceImage.addEventListener("click", () => replaceImageInput.click());
+		replaceImageInput.addEventListener("change", replaceSelectedImage);
+		bringForward.addEventListener("click", () => moveLayer(1));
+		sendBackward.addEventListener("click", () => moveLayer(-1));
+		duplicateLayer.addEventListener("click", duplicateSelected);
+		deleteLayer.addEventListener("click", deleteSelected);
+
+		canvas.addEventListener("pointerdown", onPointerDown);
+		canvas.addEventListener("pointermove", onPointerMove);
+		canvas.addEventListener("pointerup", onPointerUp);
+		canvas.addEventListener("pointercancel", onPointerUp);
+		canvas.addEventListener("dblclick", (event) => {
+			const point = canvasPoint(event);
+			const object = hitTest(point);
+			if (object?.type === "text") {
+				selectObject(object.id);
+				textContent.focus();
+				textContent.select();
+				return;
+			}
+			addTextAt(point);
+		});
+		stage.addEventListener("dragover", (event) => event.preventDefault());
+		stage.addEventListener("drop", onDrop);
+		window.addEventListener("resize", setupCanvasSize);
+		window.addEventListener("keydown", onKeyDown);
+	}
+
+	function onPointerDown(event) {
+		canvas.setPointerCapture(event.pointerId);
+		const point = canvasPoint(event);
+		const handle = hitHandle(point);
+		if (handle) {
+			const object = getSelected();
+			const center = objectCenter(object);
+			pointerMode = handle.type;
+			dragState = {
+				id: selectedId,
+				handle: handle.name,
+				start: point,
+				startAngle: Math.atan2(point.y - center.y, point.x - center.x),
+				original: { ...object },
+			};
+			return;
+		}
+		const object = hitTest(point);
+		selectObject(object?.id || null);
+		if (object) {
+			pointerMode = "move";
+			dragState = { id: object.id, dx: point.x - object.x, dy: point.y - object.y };
+		}
+	}
+
+	function onPointerMove(event) {
+		const point = canvasPoint(event);
+		if (!pointerMode || !dragState) {
+			const handle = hitHandle(point);
+			canvas.style.cursor = handle ? handle.cursor : hitTest(point) ? "move" : "crosshair";
+			return;
+		}
+		const object = getSelected();
+		if (!object) return;
+		if (pointerMode === "move") {
+			object.x = clamp(point.x - dragState.dx, -object.w + 4, COVER.w - 4);
+			object.y = clamp(point.y - dragState.dy, -object.h + 4, COVER.h - 4);
+		}
+		if (pointerMode === "resize") resizeObject(object, point, dragState);
+		if (pointerMode === "rotate") rotateObject(object, point, dragState, event.shiftKey);
+		updateInspector();
+		scheduleRender();
+	}
+
+	function onPointerUp(event) {
+		try {
+			canvas.releasePointerCapture(event.pointerId);
+		} catch (_) {
+			// Pointer capture can already be released by the browser on touch cancel.
+		}
+		pointerMode = null;
+		dragState = null;
+	}
+
+	function resizeObject(object, point, state) {
+		const original = state.original;
+		const min = 5;
+		const local = worldToLocal(point, original);
+		const fixed = fixedAnchorForHandle(state.handle, original);
+		let left = 0;
+		let right = original.w;
+		let top = 0;
+		let bottom = original.h;
+
+		if (state.handle.includes("w")) left = Math.min(local.x, original.w - min);
+		if (state.handle.includes("e")) right = Math.max(local.x, min);
+		if (state.handle.includes("n")) top = Math.min(local.y, original.h - min);
+		if (state.handle.includes("s")) bottom = Math.max(local.y, min);
+
+		const nextW = Math.max(min, right - left);
+		const nextH = Math.max(min, bottom - top);
+		const fixedWorld = localToWorld(original, fixed.originalLocal);
+		const fixedOffset = rotatePoint(
+			{
+				x: fixed.nextLocal(nextW, nextH).x - nextW / 2,
+				y: fixed.nextLocal(nextW, nextH).y - nextH / 2,
+			},
+			degToRad(original.rotation || 0),
+		);
+		const nextCenter = { x: fixedWorld.x - fixedOffset.x, y: fixedWorld.y - fixedOffset.y };
+
+		object.x = nextCenter.x - nextW / 2;
+		object.y = nextCenter.y - nextH / 2;
+		object.w = nextW;
+		object.h = nextH;
+		object.rotation = original.rotation;
+	}
+
+	function fixedAnchorForHandle(handle, object) {
+		if (handle === "n") return { originalLocal: { x: object.w / 2, y: object.h }, nextLocal: (w, h) => ({ x: w / 2, y: h }) };
+		if (handle === "s") return { originalLocal: { x: object.w / 2, y: 0 }, nextLocal: (w) => ({ x: w / 2, y: 0 }) };
+		if (handle === "e") return { originalLocal: { x: 0, y: object.h / 2 }, nextLocal: (_w, h) => ({ x: 0, y: h / 2 }) };
+		if (handle === "w") return { originalLocal: { x: object.w, y: object.h / 2 }, nextLocal: (w, h) => ({ x: w, y: h / 2 }) };
+		if (handle === "ne") return { originalLocal: { x: 0, y: object.h }, nextLocal: (_w, h) => ({ x: 0, y: h }) };
+		if (handle === "nw") return { originalLocal: { x: object.w, y: object.h }, nextLocal: (w, h) => ({ x: w, y: h }) };
+		if (handle === "se") return { originalLocal: { x: 0, y: 0 }, nextLocal: () => ({ x: 0, y: 0 }) };
+		return { originalLocal: { x: object.w, y: 0 }, nextLocal: (w) => ({ x: w, y: 0 }) };
+	}
+
+	function rotateObject(object, point, state, snap) {
+		const original = state.original;
+		const center = objectCenter(original);
+		const currentAngle = Math.atan2(point.y - center.y, point.x - center.x);
+		let next = normalizeAngle((original.rotation || 0) + radToDeg(currentAngle - state.startAngle));
+		if (snap) next = Math.round(next / 15) * 15;
+		object.rotation = next;
+	}
+
+	function onDrop(event) {
+		event.preventDefault();
+		const point = canvasPoint(event);
+		if (event.dataTransfer.files?.length) {
+			handleFiles(event.dataTransfer.files, point);
+			return;
+		}
+		const src = event.dataTransfer.getData("text/plain");
+		if (src) addAsset(src, "Logo", point);
+	}
+
+	function handleFiles(files, point = null) {
+		Array.from(files || [])
+			.filter((file) => file.type.startsWith("image/"))
+			.forEach((file) => {
+				const reader = new FileReader();
+				reader.onload = () => addImportedImage(reader.result, file.name.replace(/\.[^.]+$/, ""), point);
+				reader.readAsDataURL(file);
+			});
+	}
+
+	function applyInspectorChange() {
+		updateSelected((object) => {
+			if (object.type === "text") {
+				object.content = textContent.value;
+				object.fontFamily = fontFamily.value;
+				object.fontSize = Number(fontSize.value);
+				object.align = textAlign.value;
+			}
+			if (object.type === "image") object.fit = imageFit.value;
+			object.fill = fillColor.value;
+			object.opacity = Number(opacity.value);
+			object.rotation = Number(rotation.value);
+			object.x = Number(posX.value);
+			object.y = Number(posY.value);
+			object.w = Math.max(2, Number(posW.value));
+			object.h = Math.max(2, Number(posH.value));
+		});
+	}
+
+	function replaceSelectedImage(event) {
+		const object = getSelected();
+		const file = event.target.files?.[0];
+		if (!object || object.type !== "image" || !file) return;
+		const reader = new FileReader();
+		reader.onload = () => {
+			object.src = reader.result;
+			object.name = file.name.replace(/\.[^.]+$/, "");
+			void loadImage(object.src);
+			updateInspector();
+			scheduleRender();
+			setStatus("Image remplacée.");
+		};
+		reader.readAsDataURL(file);
+		event.target.value = "";
+	}
+
+	function moveLayer(direction) {
+		const index = project.objects.findIndex((object) => object.id === selectedId);
+		const next = index + direction;
+		if (index < 3 || next < 3 || next >= project.objects.length) return;
+		const [object] = project.objects.splice(index, 1);
+		project.objects.splice(next, 0, object);
+		scheduleRender();
+	}
+
+	function duplicateSelected() {
+		const object = getSelected();
+		if (!object) return;
+		const copy = structuredClone(object);
+		copy.id = makeId();
+		copy.name = `${object.name} copie`;
+		copy.x += 5;
+		copy.y += 5;
+		copy.locked = false;
+		project.objects.push(copy);
+		selectObject(copy.id);
+	}
+
+	function deleteSelected() {
+		const object = getSelected();
+		if (!object || object.locked) return;
+		project.objects = project.objects.filter((item) => item.id !== object.id);
+		selectObject(null);
+	}
+
+	function onKeyDown(event) {
+		if (["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement.tagName)) return;
+		if (event.key === "Delete" || event.key === "Backspace") deleteSelected();
+		if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "d") {
+			event.preventDefault();
+			duplicateSelected();
+		}
+	}
+
+	function saveProjectFile() {
+		const payload = JSON.stringify(project, null, 2);
+		downloadBlob(new Blob([payload], { type: "application/json" }), "vhs-studio-project.json");
+	}
+
+	function loadProjectFile(event) {
+		const file = event.target.files?.[0];
+		if (!file) return;
+		const reader = new FileReader();
+		reader.onload = () => {
+			try {
+				const data = JSON.parse(String(reader.result));
+				project.name = data.name || project.name;
+				project.background = data.background || project.background;
+				project.objects = Array.isArray(data.objects) ? data.objects : project.objects;
+				project.objects.filter((object) => object.type === "image").forEach((object) => void loadImage(object.src));
+				selectObject(null);
+				setStatus("Projet chargé.");
+				scheduleRender();
+			} catch (_) {
+				setStatus("Fichier projet illisible.");
+			}
+		};
+		reader.readAsText(file);
+	}
+
+	wireAssets();
+	wireEvents();
+	project.objects.filter((object) => object.type === "image").forEach((object) => void loadImage(object.src));
+	setupCanvasSize();
+	updateInspector();
+	document.fonts?.ready.then(() => scheduleRender());
+</script>
+
+<style>
+	@import url("https://fonts.googleapis.com/css2?family=Anton&family=Archivo+Black&family=Audiowide&family=Bebas+Neue&family=Bungee&family=Bungee+Inline&family=Courier+Prime:wght@400;700&family=Creepster&family=Michroma&family=Monoton&family=Orbitron:wght@400;700;900&family=Oswald:wght@400;700&family=Roboto+Condensed:wght@400;700;900&family=Special+Elite&display=swap");
+
+	@font-face {
+		font-family: "SF Movie Poster";
+		src: url("/Police%20d_ecriture/Credits%20sur%20une%20affiche_/sf_movie_poster/SF%20Movie%20Poster.ttf") format("truetype");
+		font-display: swap;
+	}
+
+	@font-face {
+		font-family: "SF Movie Poster Condensed";
+		src: url("/Police%20d_ecriture/Credits%20sur%20une%20affiche_/sf_movie_poster/SF%20Movie%20Poster%20Condensed.ttf") format("truetype");
+		font-display: swap;
+	}
+
+	@font-face {
+		font-family: "Bee Two";
+		src: url("/Police%20d_ecriture/Credits%20sur%20une%20affiche_/fonnts.com-Bee_Two.otf") format("opentype");
+		font-display: swap;
+	}
+
+	:root {
+		color-scheme: dark;
+		--bg: #0b0612;
+		--panel: rgba(18, 13, 27, 0.92);
+		--panel-2: rgba(28, 22, 40, 0.94);
+		--ink: #fff8f0;
+		--muted: #b9b0c8;
+		--cyan: #21f7ff;
+		--pink: #ff2dd4;
+		--yellow: #fff365;
+		--red: #ff3434;
+		--line: rgba(255, 255, 255, 0.14);
+		font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+		background: var(--bg);
+	}
+
+	* {
+		box-sizing: border-box;
+	}
+
+	html,
+	body {
+		margin: 0;
+		min-height: 100%;
+	}
+
+	body {
+		color: var(--ink);
+		overflow-x: hidden;
+		background:
+			linear-gradient(115deg, rgba(255, 45, 212, 0.26), transparent 24rem),
+			linear-gradient(245deg, rgba(33, 247, 255, 0.18), transparent 28rem),
+			radial-gradient(circle at 50% 0%, rgba(255, 243, 101, 0.13), transparent 26rem),
+			#08040d;
+	}
+
+	button,
+	input,
+	select,
+	textarea {
+		font: inherit;
+	}
+
+	button,
+	.file-action,
+	.upload-button {
+		min-height: 42px;
+		border: 1px solid rgba(255, 255, 255, 0.18);
+		border-radius: 8px;
+		color: var(--ink);
+		background: rgba(255, 255, 255, 0.07);
+		cursor: pointer;
+		transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+	}
+
+	button:hover,
+	.file-action:hover,
+	.upload-button:hover {
+		border-color: var(--cyan);
+		background: rgba(33, 247, 255, 0.12);
+	}
+
+	button:active {
+		transform: translateY(1px);
+	}
+
+	input,
+	select,
+	textarea {
+		width: 100%;
+		border: 1px solid var(--line);
+		border-radius: 8px;
+		color: var(--ink);
+		background: rgba(0, 0, 0, 0.28);
+	}
+
+	textarea,
+	select,
+	input[type="number"] {
+		padding: 0.72rem;
+	}
+
+	input[type="color"] {
+		height: 42px;
+		padding: 0.25rem;
+	}
+
+	input[type="range"] {
+		accent-color: var(--pink);
+	}
+
+	label {
+		display: grid;
+		gap: 0.45rem;
+		color: var(--muted);
+		font-size: 0.78rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0;
+	}
+
+	.noise {
+		position: fixed;
+		inset: 0;
+		z-index: -1;
+		opacity: 0.16;
+		background-image:
+			linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+			linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+		background-size: 6px 6px;
+		pointer-events: none;
+	}
+
+	.app-shell {
+		width: min(100%, 1720px);
+		margin: 0 auto;
+		padding: 18px;
+	}
+
+	.topbar {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+		min-height: 76px;
+		padding: 0.8rem 1rem;
+		border: 1px solid var(--line);
+		border-radius: 8px;
+		background: rgba(8, 4, 13, 0.84);
+		box-shadow: 0 0 30px rgba(255, 45, 212, 0.13);
+	}
+
+	.kicker {
+		margin: 0 0 0.2rem;
+		color: var(--cyan);
+		font-size: 0.72rem;
+		font-weight: 900;
+		text-transform: uppercase;
+	}
+
+	h1 {
+		margin: 0;
+		color: var(--yellow);
+		font-family: "SF Movie Poster", Impact, sans-serif;
+		font-size: clamp(2rem, 4vw, 4.5rem);
+		line-height: 0.82;
+		text-shadow: 4px 4px 0 #5312a3, 0 0 22px rgba(255, 243, 101, 0.44);
+	}
+
+	.actions,
+	.compact-actions,
+	.layer-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.55rem;
+	}
+
+	.actions button,
+	.actions label {
+		display: inline-grid;
+		place-items: center;
+		padding: 0 0.85rem;
+		font-weight: 900;
+		text-transform: uppercase;
+	}
+
+	.file-action input,
+	.upload-button input {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		opacity: 0;
+		pointer-events: none;
+	}
+
+	.primary {
+		border-color: rgba(33, 247, 255, 0.52);
+		background: linear-gradient(135deg, rgba(33, 247, 255, 0.26), rgba(255, 45, 212, 0.2));
+	}
+
+	.hot {
+		border-color: var(--yellow);
+		color: #160b22;
+		background: linear-gradient(135deg, var(--yellow), #ff8b2b);
+	}
+
+	.workspace {
+		display: grid;
+		grid-template-columns: minmax(250px, 300px) minmax(0, 1fr) minmax(250px, 310px);
+		gap: 16px;
+		margin-top: 16px;
+		align-items: start;
+	}
+
+	.panel {
+		display: grid;
+		gap: 1rem;
+		padding: 1rem;
+		border: 1px solid var(--line);
+		border-radius: 8px;
+		background: var(--panel);
+		box-shadow: 0 16px 42px rgba(0, 0, 0, 0.28);
+	}
+
+	.panel section {
+		display: grid;
+		gap: 0.8rem;
+		padding-bottom: 1rem;
+		border-bottom: 1px solid var(--line);
+	}
+
+	.panel section:last-child {
+		padding-bottom: 0;
+		border-bottom: 0;
+	}
+
+	.panel-title {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 0.8rem;
+		font-weight: 950;
+		text-transform: uppercase;
+	}
+
+	.panel-title small {
+		color: var(--muted);
+		font-size: 0.72rem;
+		font-weight: 800;
+	}
+
+	.segment,
+	.theme-grid,
+	.tool-grid,
+	.layer-actions {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 0.5rem;
+	}
+
+	.segment {
+		grid-template-columns: repeat(3, 1fr);
+	}
+
+	.segment button.active {
+		border-color: var(--pink);
+		color: #160b22;
+		background: var(--pink);
+	}
+
+	.upload-button {
+		position: relative;
+		display: grid;
+		place-items: center;
+		color: var(--ink);
+		font-size: 1rem;
+		text-transform: none;
+	}
+
+	.asset-tray {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 0.5rem;
+		max-height: 390px;
+		overflow: auto;
+		padding-right: 0.25rem;
+	}
+
+	.asset {
+		display: grid;
+		grid-template-rows: 58px auto;
+		gap: 0.35rem;
+		align-items: center;
+		justify-items: center;
+		min-height: 92px;
+		padding: 0.42rem;
+		font-size: 0.68rem;
+		line-height: 1.05;
+	}
+
+	.asset img {
+		max-width: 100%;
+		max-height: 58px;
+		object-fit: contain;
+		filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.2));
+	}
+
+	.asset span {
+		width: 100%;
+		overflow: hidden;
+		text-align: center;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.stage-wrap {
+		min-width: 0;
+		border: 1px solid var(--line);
+		border-radius: 8px;
+		background: rgba(8, 4, 13, 0.78);
+		overflow: hidden;
+	}
+
+	.stage-toolbar,
+	.statusbar {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+		padding: 0.75rem;
+		border-bottom: 1px solid var(--line);
+	}
+
+	.measure-strip {
+		display: grid;
+		grid-template-columns: 114fr 30fr 114fr;
+		width: min(100%, 760px);
+		border: 1px solid var(--line);
+		border-radius: 8px;
+		overflow: hidden;
+		font-size: 0.74rem;
+		font-weight: 900;
+		text-align: center;
+		text-transform: uppercase;
+	}
+
+	.measure-strip span {
+		padding: 0.55rem 0.45rem;
+		border-right: 1px solid var(--line);
+	}
+
+	.measure-strip span:last-child {
+		border-right: 0;
+	}
+
+	.guide-toggle {
+		display: flex;
+		align-items: center;
+		gap: 0.45rem;
+		min-height: 42px;
+		padding: 0 0.75rem;
+		border: 1px solid var(--line);
+		border-radius: 8px;
+		background: rgba(255, 255, 255, 0.06);
+		color: var(--ink);
+	}
+
+	.guide-toggle input {
+		width: auto;
+		accent-color: var(--yellow);
+	}
+
+	.stage-scroller {
+		overflow: auto;
+		-webkit-overflow-scrolling: touch;
+	}
+
+	.stage {
+		display: grid;
+		place-items: center;
+		min-height: clamp(310px, 61vh, 820px);
+		padding: clamp(0.65rem, 2vw, 1.5rem);
+		background:
+			linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+			linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+			rgba(255, 255, 255, 0.035);
+		background-size: 22px 22px;
+	}
+
+	canvas {
+		display: block;
+		touch-action: none;
+		border: 1px solid rgba(255, 255, 255, 0.28);
+		border-radius: 2px;
+		background: #050506;
+		box-shadow:
+			0 24px 80px rgba(0, 0, 0, 0.42),
+			0 0 0 7px rgba(255, 255, 255, 0.05),
+			0 0 42px rgba(33, 247, 255, 0.16);
+	}
+
+	.statusbar {
+		border-top: 1px solid var(--line);
+		border-bottom: 0;
+		color: var(--muted);
+		font-size: 0.78rem;
+	}
+
+	.inspector {
+		opacity: 1;
+		transition: opacity 0.18s ease;
+	}
+
+	.inspector.empty {
+		opacity: 0.48;
+	}
+
+	.split,
+	.position-grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 0.6rem;
+	}
+
+	.position-grid {
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+	}
+
+	.position-grid input {
+		padding: 0.58rem 0.45rem;
+	}
+
+	.danger {
+		border-color: rgba(255, 52, 52, 0.55);
+		color: #ffd0d0;
+	}
+
+	.print-spec {
+		display: grid;
+		gap: 0.5rem;
+	}
+
+	.print-spec div {
+		display: flex;
+		justify-content: space-between;
+		gap: 0.6rem;
+		padding: 0.62rem 0.7rem;
+		border: 1px solid var(--line);
+		border-radius: 8px;
+		background: rgba(255, 255, 255, 0.055);
+	}
+
+	.print-spec span {
+		color: var(--cyan);
+		font-weight: 900;
+	}
+
+	@media (max-width: 1180px) {
+		.workspace {
+			grid-template-columns: 280px minmax(0, 1fr);
+		}
+
+		.inspector-panel {
+			grid-column: 1 / -1;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+
+		.inspector-panel section {
+			padding-bottom: 0;
+			border-bottom: 0;
+		}
+	}
+
+	@media (max-width: 860px) {
+		.app-shell {
+			padding: 10px;
+		}
+
+		.topbar {
+			align-items: stretch;
+			flex-direction: column;
+		}
+
+		.actions {
+			display: grid;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+
+		.workspace {
+			grid-template-columns: 1fr;
+		}
+
+		.tools-panel {
+			order: 2;
+		}
+
+		.stage-wrap {
+			order: 1;
+		}
+
+		.inspector-panel {
+			order: 3;
+			grid-template-columns: 1fr;
+		}
+
+		.stage-toolbar,
+		.statusbar {
+			align-items: stretch;
+			flex-direction: column;
+		}
+
+		.measure-strip {
+			font-size: 0.62rem;
+		}
+
+		.compact-actions {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+		}
+
+		.asset-tray {
+			grid-template-columns: repeat(4, minmax(0, 1fr));
+			max-height: none;
+		}
+	}
+
+	@media (max-width: 520px) {
+		h1 {
+			font-size: 2.55rem;
+		}
+
+		.actions,
+		.tool-grid,
+		.theme-grid,
+		.layer-actions,
+		.split,
+		.position-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.asset-tray {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+		}
+
+		.measure-strip {
+			grid-template-columns: 1fr;
+			text-align: left;
+		}
+
+		.measure-strip span {
+			border-right: 0;
+			border-bottom: 1px solid var(--line);
+		}
+
+		.measure-strip span:last-child {
+			border-bottom: 0;
+		}
+	}
+</style>
