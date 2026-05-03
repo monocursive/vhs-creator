@@ -17,12 +17,22 @@
 					<span class="brand__logo">VHS STUDIO</span>
 					<span class="brand__sub">REC ●</span>
 				</div>
-				<div class="topbar__festival">
+				<a
+					class="topbar__festival"
+					id="contestLink"
+					href="https://boskop.org/appel-a-jaquettes-vhs-2026/"
+					target="_blank"
+					rel="noopener noreferrer"
+				>
 					<small>Concours 2026</small>
 					<strong>CONTRE-FICTIONS · BOSKOP · LES INTERGALACTIQUES</strong>
-				</div>
+					<span class="topbar__festival-action">Déposer sa jaquette ↗</span>
+				</a>
 				<div class="topbar__spacer"></div>
 				<div class="topbar__actions" id="topbarActions">
+					<button class="topbar__action topbar__action--secondary history-action" id="undoAction" type="button" title="Annuler (⌘Z)" disabled>↶ Annuler</button>
+					<button class="topbar__action topbar__action--secondary history-action" id="redoAction" type="button" title="Refaire (⇧⌘Z)" disabled>↷ Refaire</button>
+					<button class="topbar__action topbar__action--secondary" id="startTour" type="button">Guide</button>
 					<button class="topbar__action topbar__action--secondary" id="saveProject" type="button">Sauver</button>
 					<label class="topbar__action topbar__action--secondary file-action">
 						Charger
@@ -88,10 +98,10 @@
 
 				<div class="section">
 					<div class="section__head"><span class="section__dot"></span><span class="section__title">Affiche</span></div>
-					<label class="btn btn--neon upload-button">
+					<button class="btn btn--neon upload-button" id="imageUploadButton" type="button">
 						↥ Importer une image
-						<input id="imageUpload" type="file" accept="image/jpeg,image/png,.jpg,.jpeg,.png" multiple />
-					</label>
+					</button>
+					<input class="file-input-hidden" id="imageUpload" type="file" accept="image/jpeg,image/png,.jpg,.jpeg,.png" multiple />
 					<div class="stack-row">
 						<button class="btn btn--ghost" id="addText" type="button">+ Ajouter du texte</button>
 					</div>
@@ -124,6 +134,21 @@
 						<span class="stage__rail-icon" aria-hidden="true">▤</span>
 						<span class="stage__rail-text">Outils</span>
 					</button>
+					<div class="stage__history" aria-label="Historique">
+						<button id="undoActionStage" type="button" title="Annuler (⌘Z)" disabled>↶</button>
+						<button id="redoActionStage" type="button" title="Refaire (⇧⌘Z)" disabled>↷</button>
+					</div>
+					<button class="stage__tour-button" id="startTourStage" type="button" title="Guide rapide">?</button>
+					<a
+						class="stage__contest-link"
+						id="contestLinkStage"
+						href="https://boskop.org/appel-a-jaquettes-vhs-2026/"
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						<span>Concours</span>
+						<strong>Déposer</strong>
+					</a>
 					<div class="segment" role="group" aria-label="Zone cible">
 						<button class="active" data-zone="front" type="button">Recto</button>
 						<button data-zone="back" type="button">Verso</button>
@@ -138,6 +163,18 @@
 				<div class="stage-scroller" id="stageScroller">
 					<div class="canvas-stage" id="dropStage">
 						<canvas id="coverCanvas" aria-label="Prévisualisation de la jaquette VHS"></canvas>
+						<div class="selection-toolbar" id="selectionToolbar" hidden>
+							<button class="selection-toolbar__button text-controls" id="quickAlign" type="button" title="Alignement">≡</button>
+							<label class="selection-toolbar__swatch color-controls" title="Couleur">
+								<input id="quickColor" type="color" />
+							</label>
+							<button class="selection-toolbar__button image-controls" id="quickFit" type="button" title="Remplir / tout voir">⛶</button>
+							<span class="selection-toolbar__divider"></span>
+							<button class="selection-toolbar__button" id="quickBackward" type="button" title="Reculer">▼</button>
+							<button class="selection-toolbar__button" id="quickForward" type="button" title="Avancer">▲</button>
+							<button class="selection-toolbar__button" id="quickDuplicate" type="button" title="Dupliquer">⎘</button>
+							<button class="selection-toolbar__button selection-toolbar__button--danger" id="quickDelete" type="button" title="Supprimer">✕</button>
+						</div>
 						<button class="canvas-delete" id="canvasDelete" type="button" aria-label="Supprimer l'élément" hidden>
 							<span class="canvas-delete__icon" aria-hidden="true">✕</span>
 							<span class="canvas-delete__confirm">Confirmer ?</span>
@@ -163,6 +200,9 @@
 				</div>
 
 				<div class="section inspector" id="inspector">
+					<div class="inspector-primary-note">
+						Les réglages rapides apparaissent au-dessus de l'élément sélectionné.
+					</div>
 					<div class="field">
 						<label class="label" for="textContent">Contenu</label>
 						<textarea class="textarea" id="textContent" rows="4"></textarea>
@@ -231,22 +271,25 @@
 							</select>
 						</div>
 					</div>
-					<label class="btn btn--ghost image-controls file-action" id="replaceImage">
+					<button class="btn btn--ghost image-controls file-action" id="replaceImage" type="button">
 						↥ Remplacer l'image
-						<input id="replaceImageInput" type="file" accept="image/jpeg,image/png,.jpg,.jpeg,.png" />
-					</label>
-					<div class="position-grid">
-						<label>X <input id="posX" type="number" step="1" /></label>
-						<label>Y <input id="posY" type="number" step="1" /></label>
-						<label>L <input id="posW" type="number" step="1" /></label>
-						<label>H <input id="posH" type="number" step="1" /></label>
-					</div>
-					<div class="layer-actions">
-						<button class="btn" id="bringForward" type="button">▲ Monter</button>
-						<button class="btn" id="sendBackward" type="button">▼ Descendre</button>
-						<button class="btn" id="duplicateLayer" type="button">⎘ Dupliquer</button>
-						<button class="btn btn--danger" id="deleteLayer" type="button">✕ Supprimer</button>
-					</div>
+					</button>
+					<input class="file-input-hidden" id="replaceImageInput" type="file" accept="image/jpeg,image/png,.jpg,.jpeg,.png" />
+					<details class="advanced-controls">
+						<summary>Réglages avancés</summary>
+						<div class="position-grid">
+							<label>X <input id="posX" type="number" step="1" /></label>
+							<label>Y <input id="posY" type="number" step="1" /></label>
+							<label>L <input id="posW" type="number" step="1" /></label>
+							<label>H <input id="posH" type="number" step="1" /></label>
+						</div>
+						<div class="layer-actions">
+							<button class="btn" id="bringForward" type="button">▲ Monter</button>
+							<button class="btn" id="sendBackward" type="button">▼ Descendre</button>
+							<button class="btn" id="duplicateLayer" type="button">⎘ Dupliquer</button>
+							<button class="btn btn--danger" id="deleteLayer" type="button">✕ Supprimer</button>
+						</div>
+					</details>
 				</div>
 
 				<div class="section">
@@ -260,6 +303,20 @@
 					</ul>
 				</div>
 			</aside>
+			<div class="tour-overlay" id="tourOverlay" hidden>
+				<div class="tour-spotlight" id="tourSpotlight"></div>
+				<section class="tour-card" id="tourCard" role="dialog" aria-labelledby="tourTitle" aria-describedby="tourBody">
+					<div class="tour-card__meta" id="tourMeta"></div>
+					<h2 id="tourTitle"></h2>
+					<p id="tourBody"></p>
+					<div class="tour-card__actions">
+						<button class="tour-card__button tour-card__button--ghost" id="tourSkip" type="button">Fermer</button>
+						<button class="tour-card__button tour-card__button--ghost" id="tourPrev" type="button">Retour</button>
+						<button class="tour-card__button" id="tourNext" type="button">Suivant</button>
+					</div>
+				</section>
+			</div>
+			<div class="ui-tooltip" id="uiTooltip" role="tooltip" hidden></div>
 		</div>
 	</body>
 </html>
@@ -359,6 +416,12 @@
 	const selectedLabel = document.querySelector("#selectedLabel");
 	const inspector = document.querySelector("#inspector");
 	const assetCount = document.querySelector("#assetCount");
+	const undoAction = document.querySelector("#undoAction");
+	const redoAction = document.querySelector("#redoAction");
+	const undoActionStage = document.querySelector("#undoActionStage");
+	const redoActionStage = document.querySelector("#redoActionStage");
+	const startTour = document.querySelector("#startTour");
+	const startTourStage = document.querySelector("#startTourStage");
 	const saveProject = document.querySelector("#saveProject");
 	const loadProject = document.querySelector("#loadProject");
 	const exportPng = document.querySelector("#exportPng");
@@ -366,6 +429,7 @@
 	const addTitle = document.querySelector("#addTitle");
 	const addTextButton = document.querySelector("#addText");
 	const addBox = document.querySelector("#addBox");
+	const imageUploadButton = document.querySelector("#imageUploadButton");
 	const imageUpload = document.querySelector("#imageUpload");
 	const toggleGuides = document.querySelector("#toggleGuides");
 	const fitZoom = document.querySelector("#fitZoom");
@@ -388,6 +452,24 @@
 	const duplicateLayer = document.querySelector("#duplicateLayer");
 	const deleteLayer = document.querySelector("#deleteLayer");
 	const canvasDelete = document.querySelector("#canvasDelete");
+	const selectionToolbar = document.querySelector("#selectionToolbar");
+	const quickAlign = document.querySelector("#quickAlign");
+	const quickColor = document.querySelector("#quickColor");
+	const quickFit = document.querySelector("#quickFit");
+	const quickBackward = document.querySelector("#quickBackward");
+	const quickForward = document.querySelector("#quickForward");
+	const quickDuplicate = document.querySelector("#quickDuplicate");
+	const quickDelete = document.querySelector("#quickDelete");
+	const tourOverlay = document.querySelector("#tourOverlay");
+	const tourSpotlight = document.querySelector("#tourSpotlight");
+	const tourCard = document.querySelector("#tourCard");
+	const tourMeta = document.querySelector("#tourMeta");
+	const tourTitle = document.querySelector("#tourTitle");
+	const tourBody = document.querySelector("#tourBody");
+	const tourSkip = document.querySelector("#tourSkip");
+	const tourPrev = document.querySelector("#tourPrev");
+	const tourNext = document.querySelector("#tourNext");
+	const uiTooltip = document.querySelector("#uiTooltip");
 	let canvasDeleteConfirmTimer = 0;
 
 	let activeZone = "front";
@@ -397,7 +479,29 @@
 	let showGuides = true;
 	let raf = 0;
 	let currentScale = 1;
+	let inspectorEditPrimed = false;
+	let activeTourIndex = -1;
+	const historyPast = [];
+	const historyFuture = [];
+	const HISTORY_LIMIT = 50;
 	const imageCache = new Map();
+	const imagePromises = new Map();
+	let tooltipAnchor = null;
+	const GENERATED_FRONT_LAYER_NAMES = new Set([
+		"Halo soleil",
+		"Horizon VHS",
+		"Liseré magenta",
+		"Bande cyan",
+		"Affiche placeholder",
+		"Image plein recto",
+		"Bande titre",
+		"Image plein cadre",
+		"Bande split",
+		"Image split",
+		"Titre",
+		"Accroche",
+		"Réalisateur",
+	]);
 
 	const project = {
 		name: "contre-fictions-vhs",
@@ -422,6 +526,238 @@
 			text("Tranche", "TITRE DU FILM", 54, 89.5, 150, 15, 8.5, "#ffe357", "center", "Audiowide, SF Movie Poster Condensed, Impact, sans-serif", -90),
 		],
 	};
+
+	const TOUR_STEPS = [
+		{
+			title: "Commence par la jaquette",
+			body: "La zone centrale est ton espace de travail. Clique un élément pour le déplacer, le redimensionner ou le modifier.",
+			target: () => canvas,
+		},
+		{
+			title: "Outils rapides",
+			body: "Ouvre les outils pour importer une image, ajouter du texte, changer de thème ou choisir une mise en page.",
+			target: () => (window.matchMedia("(max-width: 900px)").matches ? document.querySelector("#toggleToolsRail") : document.querySelector(".rail--left")),
+		},
+		{
+			title: "Recto, verso, tranche",
+			body: "Ce sélecteur décide où les nouveaux éléments sont placés. Garde Recto pour travailler sur la face avant.",
+			target: () => document.querySelector(".segment"),
+		},
+		{
+			title: "Édition directe",
+			body: "Je sélectionne le titre pour montrer les poignées. Glisse l'élément, utilise les coins pour la taille, et double-clique pour modifier le texte.",
+			target: () => selectionToolbar.hidden ? canvas : selectionToolbar,
+			prepare: selectTitleForTour,
+		},
+		{
+			title: "Barre flottante",
+			body: "Les actions fréquentes restent près de l'objet : aligner, couleur, ordre des calques, dupliquer ou supprimer.",
+			target: () => selectionToolbar,
+			prepare: selectTitleForTour,
+		},
+		{
+			title: "Annuler sans stress",
+			body: "Ces boutons annulent ou rétablissent tes actions. C'est le filet de sécurité pour essayer des idées vite.",
+			target: () => document.querySelector(".stage__history"),
+		},
+		{
+			title: "Réglages avancés",
+			body: "Le panneau Calques garde les réglages précis. Les positions X/Y/L/H sont rangées dans Réglages avancés pour ne pas gêner le flux principal.",
+			target: () => (window.matchMedia("(max-width: 900px)").matches ? document.querySelector("#toggleInspectorRail") : document.querySelector(".rail--right")),
+		},
+		{
+			title: "Exporter",
+			body: "Quand la jaquette est prête, exporte en PDF impression ou PNG depuis le menu du haut.",
+			target: () => (window.matchMedia("(max-width: 900px)").matches ? document.querySelector("#topbarMenu") : exportPdf),
+		},
+	];
+
+	const HELP_TEXT = {
+		undoAction: "Annule la dernière modification.",
+		redoAction: "Rétablit la modification annulée.",
+		undoActionStage: "Annule la dernière modification.",
+		redoActionStage: "Rétablit la modification annulée.",
+		startTour: "Lance une visite guidée rapide de l'éditeur.",
+		startTourStage: "Lance une visite guidée rapide de l'éditeur.",
+		saveProject: "Télécharge le projet en JSON pour le reprendre plus tard.",
+		exportPng: "Exporte une image PNG haute résolution.",
+		exportPdf: "Crée un PDF A4 prêt pour l'impression.",
+		contestLink: "Ouvre la page BosKop du concours pour déposer ta jaquette.",
+		contestLinkStage: "Ouvre la page BosKop du concours pour déposer ta jaquette.",
+		topbarMenu: "Ouvre les actions de projet et d'export.",
+		toggleToolsRail: "Affiche les outils pour ajouter du contenu.",
+		toggleInspectorRail: "Affiche les réglages du calque sélectionné.",
+		imageUploadButton: "Ajoute une image JPG ou PNG sur la zone active.",
+		addText: "Ajoute un bloc de texte libre.",
+		addTitle: "Ajoute un titre stylisé.",
+		addBox: "Ajoute un bloc couleur décoratif.",
+		fitZoom: "Recentre la jaquette dans la zone de travail.",
+		quickAlign: "Change l'alignement du texte sélectionné.",
+		quickFit: "Bascule l'image entre remplissage et image entière.",
+		quickBackward: "Place le calque un cran derrière.",
+		quickForward: "Place le calque un cran devant.",
+		quickDuplicate: "Duplique l'élément sélectionné.",
+		quickDelete: "Supprime l'élément sélectionné.",
+		replaceImage: "Remplace l'image du calque sélectionné.",
+		bringForward: "Place le calque un cran devant.",
+		sendBackward: "Place le calque un cran derrière.",
+		duplicateLayer: "Duplique le calque sélectionné.",
+		deleteLayer: "Supprime le calque sélectionné.",
+		tourSkip: "Ferme la visite guidée.",
+		tourPrev: "Retourne à l'étape précédente.",
+		tourNext: "Passe à l'étape suivante.",
+	};
+
+	const THEME_HELP = {
+		neon: "Applique une ambiance VHS néon.",
+		rental: "Applique un style vidéoclub plus chaleureux.",
+		scifi: "Applique une ambiance science-fiction.",
+		horror: "Applique une ambiance horreur sombre.",
+	};
+
+	const LAYOUT_HELP = {
+		classic: "Image principale au centre, titre en bas.",
+		bigtype: "Grand titre dominant sur le recto.",
+		poster: "Affiche plein cadre sur la face avant.",
+		split: "Bandeau image en haut, titre en dessous.",
+	};
+
+	const ZONE_HELP = {
+		front: "Place les nouveaux éléments sur le recto.",
+		back: "Place les nouveaux éléments sur le verso.",
+		spine: "Place les nouveaux éléments sur la tranche.",
+	};
+
+	function projectSnapshot() {
+		return {
+			name: project.name,
+			background: project.background,
+			objects: structuredClone(project.objects),
+			activeTheme,
+			activeLayout,
+			showGuides,
+		};
+	}
+
+	function restoreProjectSnapshot(snapshot) {
+		project.name = snapshot.name || project.name;
+		project.background = snapshot.background || project.background;
+		project.objects = structuredClone(snapshot.objects || project.objects);
+		activeTheme = snapshot.activeTheme || activeTheme;
+		activeLayout = snapshot.activeLayout || activeLayout;
+		showGuides = snapshot.showGuides ?? showGuides;
+		toggleGuides.checked = showGuides;
+		project.objects.filter((object) => object.type === "image").forEach((object) => void loadImage(object.src).catch(() => null));
+		document.querySelectorAll("[data-theme]").forEach((button) => {
+			button.dataset.active = String(button.dataset.theme === activeTheme);
+		});
+		document.querySelectorAll("[data-layout]").forEach((button) => {
+			button.dataset.active = String(button.dataset.layout === activeLayout);
+		});
+		selectObject(null);
+		updateHistoryButtons();
+		scheduleRender();
+	}
+
+	function updateHistoryButtons() {
+		for (const button of [undoAction, undoActionStage]) button.disabled = historyPast.length === 0;
+		for (const button of [redoAction, redoActionStage]) button.disabled = historyFuture.length === 0;
+	}
+
+	function applyTooltipLabels() {
+		for (const [id, help] of Object.entries(HELP_TEXT)) {
+			document.querySelector(`#${id}`)?.setAttribute("data-help", help);
+		}
+		document.querySelector("#loadProject")?.closest("label")?.setAttribute("data-help", "Charge un projet VHS Studio sauvegardé.");
+		toggleGuides.closest("label")?.setAttribute("data-help", "Affiche ou masque les repères d'impression.");
+		quickColor.closest("label")?.setAttribute("data-help", "Change la couleur de l'élément sélectionné.");
+		document.querySelectorAll("[data-theme]").forEach((button) => {
+			button.dataset.help = THEME_HELP[button.dataset.theme] || "Change le thème visuel.";
+		});
+		document.querySelectorAll("[data-layout]").forEach((button) => {
+			button.dataset.help = LAYOUT_HELP[button.dataset.layout] || "Change la mise en page du recto.";
+		});
+		document.querySelectorAll("[data-zone]").forEach((button) => {
+			button.dataset.help = ZONE_HELP[button.dataset.zone] || "Choisit la zone active.";
+		});
+	}
+
+	function tooltipTarget(target) {
+		return target.closest("[data-help], button[title], label[title], .asset[title], .rating[title]");
+	}
+
+	function tooltipText(element) {
+		return element?.dataset?.help || element?.getAttribute("title") || element?.getAttribute("aria-label") || element?.textContent?.trim() || "";
+	}
+
+	function showTooltip(event) {
+		const target = tooltipTarget(event.target);
+		const textValue = tooltipText(target);
+		if (!target || !textValue || target.disabled || tourOverlay.hidden === false) return;
+		tooltipAnchor = target;
+		uiTooltip.textContent = textValue;
+		uiTooltip.hidden = false;
+		positionTooltip(event);
+	}
+
+	function positionTooltip(event = null) {
+		if (!tooltipAnchor || uiTooltip.hidden) return;
+		const rect = tooltipAnchor.getBoundingClientRect();
+		const tooltipRect = uiTooltip.getBoundingClientRect();
+		const fromPointer = event?.clientX && event?.clientY;
+		const anchorX = fromPointer ? event.clientX : rect.left + rect.width / 2;
+		const anchorY = fromPointer ? event.clientY : rect.top;
+		const left = clamp(anchorX - tooltipRect.width / 2, 10, window.innerWidth - tooltipRect.width - 10);
+		const aboveTop = anchorY - tooltipRect.height - 14;
+		const belowTop = rect.bottom + 12;
+		const top = aboveTop > 10 ? aboveTop : Math.min(window.innerHeight - tooltipRect.height - 10, belowTop);
+		uiTooltip.style.left = `${left}px`;
+		uiTooltip.style.top = `${top}px`;
+	}
+
+	function hideTooltip() {
+		tooltipAnchor = null;
+		uiTooltip.hidden = true;
+	}
+
+	function wireTooltips() {
+		applyTooltipLabels();
+		document.addEventListener("pointerover", showTooltip);
+		document.addEventListener("pointermove", positionTooltip);
+		document.addEventListener("pointerout", (event) => {
+			if (tooltipAnchor && !event.relatedTarget?.closest?.("[data-help], button[title], label[title], .asset[title], .rating[title]")) hideTooltip();
+		});
+		document.addEventListener("mouseover", showTooltip);
+		document.addEventListener("mousemove", positionTooltip);
+		document.addEventListener("mouseout", (event) => {
+			if (tooltipAnchor && !event.relatedTarget?.closest?.("[data-help], button[title], label[title], .asset[title], .rating[title]")) hideTooltip();
+		});
+		document.addEventListener("focusin", showTooltip);
+		document.addEventListener("focusout", hideTooltip);
+		window.addEventListener("scroll", hideTooltip, true);
+		window.addEventListener("resize", hideTooltip);
+	}
+
+	function pushHistory() {
+		historyPast.push(projectSnapshot());
+		if (historyPast.length > HISTORY_LIMIT) historyPast.shift();
+		historyFuture.length = 0;
+		updateHistoryButtons();
+	}
+
+	function undoProject() {
+		if (!historyPast.length) return;
+		historyFuture.unshift(projectSnapshot());
+		restoreProjectSnapshot(historyPast.pop());
+		setStatus("Modification annulée.");
+	}
+
+	function redoProject() {
+		if (!historyFuture.length) return;
+		historyPast.push(projectSnapshot());
+		restoreProjectSnapshot(historyFuture.shift());
+		setStatus("Modification rétablie.");
+	}
 
 	function makeId() {
 		return `layer-${Math.random().toString(36).slice(2, 9)}`;
@@ -457,9 +793,9 @@
 	}
 
 	function setupCanvasSize() {
-		const box = stage.getBoundingClientRect();
-		const maxWidth = Math.max(320, box.width);
-		const cssW = Math.min(maxWidth, 1180);
+		const box = stageScroller.getBoundingClientRect();
+		const isMobile = window.matchMedia("(max-width: 900px)").matches;
+		const cssW = Math.min(Math.max(240, box.width - (isMobile ? 18 : 0)), 1180);
 		const cssH = cssW * (COVER.h / COVER.w);
 		const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
 		canvas.style.width = `${cssW}px`;
@@ -469,6 +805,7 @@
 		currentScale = canvas.width / COVER.w;
 		render();
 		updateCanvasDeleteButton();
+		updateSelectionToolbar();
 	}
 
 	function render(targetCanvas = canvas, opts = {}) {
@@ -676,17 +1013,23 @@
 
 	function loadImage(src) {
 		if (imageCache.has(src)) return Promise.resolve(imageCache.get(src));
-		return new Promise((resolve, reject) => {
+		if (imagePromises.has(src)) return imagePromises.get(src);
+		const promise = new Promise((resolve, reject) => {
 			const img = new Image();
 			img.onload = () => {
 				imageCache.set(src, img);
+				imagePromises.delete(src);
 				scheduleRender();
 				resolve(img);
 			};
-			img.onerror = reject;
+			img.onerror = () => {
+				imagePromises.delete(src);
+				reject(new Error(`Unable to load image: ${src}`));
+			};
 			img.src = src;
-			imageCache.set(src, img);
 		});
+		imagePromises.set(src, promise);
+		return promise;
 	}
 
 	function canvasPoint(event) {
@@ -762,6 +1105,7 @@
 		selectedId = id;
 		updateInspector();
 		updateCanvasDeleteButton();
+		updateSelectionToolbar();
 		scheduleRender();
 	}
 
@@ -780,10 +1124,14 @@
 	}
 
 	function updateCanvasDeleteButton() {
+		canvasDelete.hidden = true;
+		resetCanvasDeleteConfirm();
+	}
+
+	function updateSelectionToolbar() {
 		const object = getSelected();
 		if (!object || object.locked) {
-			canvasDelete.hidden = true;
-			resetCanvasDeleteConfirm();
+			selectionToolbar.hidden = true;
 			return;
 		}
 		const stage = canvas.parentElement;
@@ -794,12 +1142,91 @@
 		const offsetLeft = canvasRect.left - stageRect.left;
 		const offsetTop = canvasRect.top - stageRect.top;
 		const scale = canvasRect.width / COVER.w;
-		const corner = localToWorld(object, { x: object.w, y: 0 });
-		const left = corner.x * scale + offsetLeft;
-		const top = corner.y * scale + offsetTop;
-		canvasDelete.hidden = false;
-		canvasDelete.style.left = `${left}px`;
-		canvasDelete.style.top = `${top}px`;
+		const topCenter = localToWorld(object, { x: object.w / 2, y: 0 });
+		const left = topCenter.x * scale + offsetLeft;
+		const top = topCenter.y * scale + offsetTop;
+		selectionToolbar.hidden = false;
+		selectionToolbar.dataset.kind = object.type;
+		selectionToolbar.style.left = `${left}px`;
+		selectionToolbar.style.top = `${top}px`;
+		quickColor.value = object.fill || "#ffffff";
+		quickFit.textContent = object.fit === "cover" ? "□" : "⛶";
+	}
+
+	function selectTitleForTour() {
+		const title = project.objects
+			.slice()
+			.reverse()
+			.find((object) => object.type === "text" && object.name === "Titre" && object.x >= ZONES.front.x);
+		if (title) selectObject(title.id);
+	}
+
+	function startTourAt(index = 0) {
+		hideTooltip();
+		activeTourIndex = clamp(index, 0, TOUR_STEPS.length - 1);
+		tourOverlay.hidden = false;
+		document.body.classList.add("is-tour-open");
+		renderTourStep();
+	}
+
+	function closeTour() {
+		activeTourIndex = -1;
+		tourOverlay.hidden = true;
+		document.body.classList.remove("is-tour-open");
+	}
+
+	function nextTourStep() {
+		if (activeTourIndex >= TOUR_STEPS.length - 1) {
+			closeTour();
+			return;
+		}
+		activeTourIndex += 1;
+		renderTourStep();
+	}
+
+	function previousTourStep() {
+		if (activeTourIndex <= 0) return;
+		activeTourIndex -= 1;
+		renderTourStep();
+	}
+
+	function renderTourStep() {
+		const step = TOUR_STEPS[activeTourIndex];
+		if (!step) return;
+		step.prepare?.();
+		tourMeta.textContent = `Étape ${activeTourIndex + 1} / ${TOUR_STEPS.length}`;
+		tourTitle.textContent = step.title;
+		tourBody.textContent = step.body;
+		tourPrev.disabled = activeTourIndex === 0;
+		tourNext.textContent = activeTourIndex === TOUR_STEPS.length - 1 ? "Terminer" : "Suivant";
+		requestAnimationFrame(positionTourStep);
+	}
+
+	function positionTourStep() {
+		if (activeTourIndex < 0 || tourOverlay.hidden) return;
+		const step = TOUR_STEPS[activeTourIndex];
+		const target = step?.target?.();
+		const rect = target?.getBoundingClientRect?.();
+		const fallback = canvas.getBoundingClientRect();
+		const box = rect && rect.width > 0 && rect.height > 0 ? rect : fallback;
+		const pad = 10;
+		const left = Math.max(8, box.left - pad);
+		const top = Math.max(8, box.top - pad);
+		const width = Math.min(window.innerWidth - left - 8, box.width + pad * 2);
+		const height = Math.min(window.innerHeight - top - 8, box.height + pad * 2);
+
+		tourSpotlight.style.left = `${left}px`;
+		tourSpotlight.style.top = `${top}px`;
+		tourSpotlight.style.width = `${width}px`;
+		tourSpotlight.style.height = `${height}px`;
+
+		const cardRect = tourCard.getBoundingClientRect();
+		const preferredBelow = top + height + 14;
+		const preferredAbove = top - cardRect.height - 14;
+		const cardTop = preferredBelow + cardRect.height < window.innerHeight - 10 ? preferredBelow : Math.max(10, preferredAbove);
+		const cardLeft = clamp(left + width / 2 - cardRect.width / 2, 10, window.innerWidth - cardRect.width - 10);
+		tourCard.style.left = `${cardLeft}px`;
+		tourCard.style.top = `${cardTop}px`;
 	}
 
 	function onCanvasDeleteClick(event) {
@@ -828,6 +1255,7 @@
 		});
 		imageFit.disabled = !object || object.type !== "image";
 		const replaceDisabled = !object || object.type !== "image";
+		replaceImage.disabled = replaceDisabled;
 		replaceImageInput.disabled = replaceDisabled;
 		replaceImage.setAttribute("aria-disabled", replaceDisabled ? "true" : "false");
 		if (!object) return;
@@ -850,10 +1278,12 @@
 		if (!object) return;
 		mutator(object);
 		updateInspector();
+		updateSelectionToolbar();
 		scheduleRender();
 	}
 
 	function addObject(object) {
+		pushHistory();
 		project.objects.push(object);
 		selectObject(object.id);
 		setStatus(`${object.name} ajouté.`);
@@ -932,6 +1362,7 @@
 				object.x = clamp(point ? point.x - object.w / 2 : zone.x + (zone.w - object.w) / 2, 0, COVER.w - object.w);
 				object.y = clamp(point ? point.y - object.h / 2 : zone.y + (zone.h - object.h) / 2, 0, COVER.h - object.h);
 				updateInspector();
+				updateSelectionToolbar();
 				scheduleRender();
 			})
 			.catch(() => setStatus("Image impossible à charger."));
@@ -941,12 +1372,22 @@
 		return project.objects.filter((object) => object.x >= ZONES.front.x && !object.locked);
 	}
 
+	function isGeneratedFrontObject(object) {
+		return object.layoutGenerated === true || GENERATED_FRONT_LAYER_NAMES.has(object.name);
+	}
+
 	function rebuildFront(layoutKey) {
 		const t = THEMES[activeTheme];
 		const previous = frontObjects();
-		const oldTitle = previous.find((object) => object.type === "text" && object.fontSize >= 10)?.content || "TITRE\nDU FILM";
-		const oldTagline = previous.find((object) => object.type === "text" && object.fontSize < 7)?.content || "UNE NUIT, TOUT BASCULE";
-		project.objects = project.objects.filter((object, index) => index < 3 || object.x < ZONES.front.x);
+		const oldTitle =
+			previous.find((object) => object.type === "text" && object.name === "Titre" && isGeneratedFrontObject(object))?.content ||
+			previous.find((object) => object.type === "text" && object.fontSize >= 10)?.content ||
+			"TITRE\nDU FILM";
+		const oldTagline =
+			previous.find((object) => object.type === "text" && object.name === "Accroche" && isGeneratedFrontObject(object))?.content ||
+			previous.find((object) => object.type === "text" && object.fontSize < 7)?.content ||
+			"UNE NUIT, TOUT BASCULE";
+		project.objects = project.objects.filter((object, index) => index < 3 || object.x < ZONES.front.x || !isGeneratedFrontObject(object));
 
 		const created = [];
 		const add = (object) => {
@@ -978,6 +1419,7 @@
 			add(text("Réalisateur", "UN FILM DE  PRÉNOM NOM", 154, 178, 94, 6, 3.3, t.body, "center", "SF Movie Poster Condensed, Impact, sans-serif"));
 		}
 		created.forEach((object) => {
+			object.layoutGenerated = true;
 			if (object.type === "text" && object.fontSize >= 10) object.shadow = t.shadow;
 			if (object.name?.includes("Bande titre")) object.opacity = 0.58;
 		});
@@ -986,6 +1428,8 @@
 	}
 
 	function applyTheme(theme) {
+		if (theme === activeTheme) return;
+		pushHistory();
 		const [back, spine, front] = project.objects.slice(0, 3);
 		const t = THEMES[theme] || THEMES.neon;
 		activeTheme = theme;
@@ -1012,6 +1456,8 @@
 	}
 
 	function applyLayout(layoutKey) {
+		if (layoutKey === activeLayout) return;
+		pushHistory();
 		activeLayout = layoutKey;
 		rebuildFront(layoutKey);
 		document.querySelectorAll("[data-layout]").forEach((button) => {
@@ -1100,7 +1546,7 @@
 		assetTray.innerHTML = av
 			.map(
 				(asset) => `
-					<button class="asset" type="button" draggable="true" data-src="${asset.src}" title="${asset.label}">
+					<button class="asset" type="button" draggable="true" data-src="${asset.src}" title="${asset.label}" data-help="Ajoute le logo ${asset.label} sur la zone active.">
 						<img src="${asset.src}" alt="" loading="lazy" />
 						<span>${asset.label}</span>
 					</button>
@@ -1110,7 +1556,7 @@
 		ratingsTray.innerHTML = ratings
 			.map(
 				(asset) => `
-					<button class="rating" type="button" draggable="true" data-src="${asset.src}" title="${asset.label}" aria-label="${asset.label}">
+					<button class="rating" type="button" draggable="true" data-src="${asset.src}" title="${asset.label}" aria-label="${asset.label}" data-help="Ajoute la classification ${asset.label}.">
 						<img src="${asset.src}" alt="${asset.label}" loading="lazy" />
 					</button>
 				`,
@@ -1136,16 +1582,27 @@
 			});
 		});
 
-		document.querySelectorAll("[data-theme]").forEach((button) => button.addEventListener("click", () => applyTheme(button.dataset.theme)));
-		document.querySelectorAll("[data-layout]").forEach((button) => button.addEventListener("click", () => applyLayout(button.dataset.layout)));
-		addTitle.addEventListener("click", () => addTextLayer("title"));
+			document.querySelectorAll("[data-theme]").forEach((button) => button.addEventListener("click", () => applyTheme(button.dataset.theme)));
+			document.querySelectorAll("[data-layout]").forEach((button) => button.addEventListener("click", () => applyLayout(button.dataset.layout)));
+			undoAction.addEventListener("click", undoProject);
+			redoAction.addEventListener("click", redoProject);
+			undoActionStage.addEventListener("click", undoProject);
+			redoActionStage.addEventListener("click", redoProject);
+			startTour.addEventListener("click", () => startTourAt(0));
+			startTourStage.addEventListener("click", () => startTourAt(0));
+			tourSkip.addEventListener("click", closeTour);
+			tourPrev.addEventListener("click", previousTourStep);
+			tourNext.addEventListener("click", nextTourStep);
+			addTitle.addEventListener("click", () => addTextLayer("title"));
 		addTextButton.addEventListener("click", () => addTextLayer("body"));
 		addBox.addEventListener("click", addRect);
-		imageUpload.addEventListener("change", (event) => handleFiles(event.target.files));
-		toggleGuides.addEventListener("change", () => {
-			showGuides = toggleGuides.checked;
-			scheduleRender();
-		});
+		imageUploadButton.addEventListener("click", openImageUploadPicker);
+			imageUpload.addEventListener("change", (event) => handleFiles(event.target.files));
+			toggleGuides.addEventListener("change", () => {
+				pushHistory();
+				showGuides = toggleGuides.checked;
+				scheduleRender();
+			});
 		fitZoom.addEventListener("click", () => {
 			const target = canvas;
 			const wrap = stageScroller;
@@ -1159,16 +1616,38 @@
 		saveProject.addEventListener("click", saveProjectFile);
 		loadProject.addEventListener("change", loadProjectFile);
 
-		for (const control of [textContent, fontFamily, fontSize, fillColor, opacity, rotation, textAlign, imageFit, posX, posY, posW, posH]) {
-			control.addEventListener("input", applyInspectorChange);
-		}
-		replaceImageInput.addEventListener("change", replaceSelectedImage);
+			for (const control of [textContent, fontFamily, fontSize, fillColor, opacity, rotation, textAlign, imageFit, posX, posY, posW, posH]) {
+				control.addEventListener("focus", prepareInspectorEdit);
+				control.addEventListener("pointerdown", prepareInspectorEdit);
+				control.addEventListener("input", applyInspectorChange);
+				control.addEventListener("change", () => {
+					inspectorEditPrimed = false;
+				});
+				control.addEventListener("blur", () => {
+					inspectorEditPrimed = false;
+				});
+			}
+			replaceImage.addEventListener("click", openReplaceImagePicker);
+			replaceImageInput.addEventListener("change", replaceSelectedImage);
 		bringForward.addEventListener("click", () => moveLayer(1));
 		sendBackward.addEventListener("click", () => moveLayer(-1));
-		duplicateLayer.addEventListener("click", duplicateSelected);
-		deleteLayer.addEventListener("click", deleteSelected);
+			duplicateLayer.addEventListener("click", duplicateSelected);
+			deleteLayer.addEventListener("click", deleteSelected);
+			quickAlign.addEventListener("click", cycleTextAlign);
+			quickColor.addEventListener("focus", prepareInspectorEdit);
+			quickColor.addEventListener("pointerdown", prepareInspectorEdit);
+			quickColor.addEventListener("input", applyQuickColor);
+			quickColor.addEventListener("change", () => {
+				inspectorEditPrimed = false;
+			});
+			quickFit.addEventListener("click", toggleImageFit);
+			quickBackward.addEventListener("click", () => moveLayer(-1));
+			quickForward.addEventListener("click", () => moveLayer(1));
+			quickDuplicate.addEventListener("click", duplicateSelected);
+			quickDelete.addEventListener("click", deleteSelected);
+			selectionToolbar.addEventListener("pointerdown", (event) => event.stopPropagation());
 
-		canvasDelete.addEventListener("click", onCanvasDeleteClick);
+			canvasDelete.addEventListener("click", onCanvasDeleteClick);
 		canvasDelete.addEventListener("pointerdown", (event) => event.stopPropagation());
 
 		canvas.addEventListener("pointerdown", onPointerDown);
@@ -1192,6 +1671,7 @@
 		stage.addEventListener("dragover", (event) => event.preventDefault());
 		stage.addEventListener("drop", onDrop);
 		window.addEventListener("resize", setupCanvasSize);
+		window.addEventListener("scroll", positionTourStep, true);
 		window.addEventListener("keydown", onKeyDown);
 
 		wireMobileChrome();
@@ -1268,6 +1748,7 @@
 				start: point,
 				startAngle: Math.atan2(point.y - center.y, point.x - center.x),
 				original: { ...object },
+				historyPushed: false,
 			};
 			return;
 		}
@@ -1275,7 +1756,7 @@
 		selectObject(object?.id || null);
 		if (object) {
 			pointerMode = "move";
-			dragState = { id: object.id, dx: point.x - object.x, dy: point.y - object.y };
+			dragState = { id: object.id, dx: point.x - object.x, dy: point.y - object.y, historyPushed: false };
 		}
 	}
 
@@ -1288,6 +1769,10 @@
 		}
 		const object = getSelected();
 		if (!object) return;
+		if (!dragState.historyPushed) {
+			pushHistory();
+			dragState.historyPushed = true;
+		}
 		if (pointerMode === "move") {
 			object.x = clamp(point.x - dragState.dx, -object.w + 4, COVER.w - 4);
 			object.y = clamp(point.y - dragState.dy, -object.h + 4, COVER.h - 4);
@@ -1296,6 +1781,7 @@
 		if (pointerMode === "rotate") rotateObject(object, point, dragState, event.shiftKey);
 		updateInspector();
 		updateCanvasDeleteButton();
+		updateSelectionToolbar();
 		scheduleRender();
 	}
 
@@ -1392,6 +1878,47 @@
 		});
 	}
 
+	function openImageUploadPicker() {
+		imageUpload.value = "";
+		imageUpload.click();
+	}
+
+	function prepareInspectorEdit() {
+		if (inspectorEditPrimed || !getSelected()) return;
+		pushHistory();
+		inspectorEditPrimed = true;
+	}
+
+	function applyQuickColor() {
+		prepareInspectorEdit();
+		updateSelected((object) => {
+			object.fill = quickColor.value;
+		});
+	}
+
+	function cycleTextAlign() {
+		const object = getSelected();
+		if (!object || object.type !== "text") return;
+		pushHistory();
+		const options = ["left", "center", "right"];
+		object.align = options[(options.indexOf(object.align || "left") + 1) % options.length];
+		updateInspector();
+		updateSelectionToolbar();
+		scheduleRender();
+		setStatus(`Alignement ${object.align}.`);
+	}
+
+	function toggleImageFit() {
+		const object = getSelected();
+		if (!object || object.type !== "image") return;
+		pushHistory();
+		object.fit = object.fit === "cover" ? "contain" : "cover";
+		updateInspector();
+		updateSelectionToolbar();
+		scheduleRender();
+		setStatus(object.fit === "cover" ? "Image remplie." : "Image entière visible.");
+	}
+
 	function applyInspectorChange() {
 		updateSelected((object) => {
 			if (object.type === "text") {
@@ -1411,16 +1938,25 @@
 		});
 	}
 
+	function openReplaceImagePicker() {
+		const object = getSelected();
+		if (!object || object.type !== "image" || replaceImage.disabled) return;
+		replaceImageInput.value = "";
+		replaceImageInput.click();
+	}
+
 	function replaceSelectedImage(event) {
 		const object = getSelected();
 		const file = event.target.files?.[0];
 		if (!object || object.type !== "image" || !file) return;
+		pushHistory();
 		const reader = new FileReader();
 		reader.onload = () => {
 			object.src = reader.result;
 			object.name = file.name.replace(/\.[^.]+$/, "");
 			void loadImage(object.src);
 			updateInspector();
+			updateSelectionToolbar();
 			scheduleRender();
 			setStatus("Image remplacée.");
 		};
@@ -1432,14 +1968,17 @@
 		const index = project.objects.findIndex((object) => object.id === selectedId);
 		const next = index + direction;
 		if (index < 3 || next < 3 || next >= project.objects.length) return;
+		pushHistory();
 		const [object] = project.objects.splice(index, 1);
 		project.objects.splice(next, 0, object);
+		updateSelectionToolbar();
 		scheduleRender();
 	}
 
 	function duplicateSelected() {
 		const object = getSelected();
 		if (!object) return;
+		pushHistory();
 		const copy = structuredClone(object);
 		copy.id = makeId();
 		copy.name = `${object.name} copie`;
@@ -1453,12 +1992,36 @@
 	function deleteSelected() {
 		const object = getSelected();
 		if (!object || object.locked) return;
+		pushHistory();
 		project.objects = project.objects.filter((item) => item.id !== object.id);
 		selectObject(null);
 	}
 
 	function onKeyDown(event) {
+		if (activeTourIndex >= 0) {
+			if (event.key === "Escape") {
+				event.preventDefault();
+				closeTour();
+				return;
+			}
+			if (event.key === "ArrowRight") {
+				event.preventDefault();
+				nextTourStep();
+				return;
+			}
+			if (event.key === "ArrowLeft") {
+				event.preventDefault();
+				previousTourStep();
+				return;
+			}
+		}
 		if (["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement.tagName)) return;
+		if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "z") {
+			event.preventDefault();
+			if (event.shiftKey) redoProject();
+			else undoProject();
+			return;
+		}
 		if (event.key === "Delete" || event.key === "Backspace") deleteSelected();
 		if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "d") {
 			event.preventDefault();
@@ -1471,6 +2034,86 @@
 		downloadBlob(new Blob([payload], { type: "application/json" }), "vhs-studio-project.json");
 	}
 
+	function cleanString(value, fallback = "", maxLength = 4000) {
+		return typeof value === "string" ? value.slice(0, maxLength) : fallback;
+	}
+
+	function cleanNumber(value, fallback, min, max) {
+		const number = Number(value);
+		return Number.isFinite(number) ? clamp(number, min, max) : fallback;
+	}
+
+	function cleanColor(value, fallback = "#ffffff") {
+		return typeof value === "string" && /^#[0-9a-f]{6}$/i.test(value) ? value : fallback;
+	}
+
+	function cleanStroke(value) {
+		if (value === "transparent") return value;
+		return cleanColor(value, "transparent");
+	}
+
+	function cleanImageSource(value) {
+		if (typeof value !== "string") return null;
+		if (value.startsWith("/") || /^data:image\/(?:png|jpe?g);base64,/i.test(value)) return value;
+		return null;
+	}
+
+	function normalizeProjectObject(raw, seenIds) {
+		if (!raw || typeof raw !== "object") return null;
+		if (!["rect", "text", "image"].includes(raw.type)) return null;
+
+		const rawId = cleanString(raw.id, "", 80);
+		const id = rawId && !seenIds.has(rawId) ? rawId : makeId();
+		seenIds.add(id);
+
+		const base = {
+			id,
+			type: raw.type,
+			name: cleanString(raw.name, "Calque", 80),
+			x: cleanNumber(raw.x, 0, -COVER.w, COVER.w * 2),
+			y: cleanNumber(raw.y, 0, -COVER.h, COVER.h * 2),
+			w: cleanNumber(raw.w, 20, 2, COVER.w * 2),
+			h: cleanNumber(raw.h, 20, 2, COVER.h * 2),
+			opacity: cleanNumber(raw.opacity, 1, 0, 1),
+			rotation: cleanNumber(raw.rotation, 0, -180, 180),
+			locked: raw.locked === true,
+		};
+		if (raw.layoutGenerated === true) base.layoutGenerated = true;
+
+		if (raw.type === "rect") {
+			return {
+				...base,
+				fill: cleanColor(raw.fill, "#000000"),
+				stroke: cleanStroke(raw.stroke),
+			};
+		}
+
+		if (raw.type === "text") {
+			return {
+				...base,
+				content: cleanString(raw.content, "", 6000),
+				fontSize: cleanNumber(raw.fontSize, 8, 2, 180),
+				fill: cleanColor(raw.fill, "#ffffff"),
+				align: ["left", "center", "right"].includes(raw.align) ? raw.align : "left",
+				fontFamily: cleanString(raw.fontFamily, "Arial, sans-serif", 180),
+				shadow: cleanString(raw.shadow, "", 120),
+			};
+		}
+
+		const src = cleanImageSource(raw.src);
+		if (!src) return null;
+		return {
+			...base,
+			src,
+			fit: raw.fit === "cover" ? "cover" : "contain",
+		};
+	}
+
+	function normalizeProjectObjects(objects) {
+		const seenIds = new Set();
+		return objects.map((object) => normalizeProjectObject(object, seenIds)).filter(Boolean);
+	}
+
 	function loadProjectFile(event) {
 		const file = event.target.files?.[0];
 		if (!file) return;
@@ -1478,9 +2121,13 @@
 		reader.onload = () => {
 			try {
 				const data = JSON.parse(String(reader.result));
+				if (!Array.isArray(data.objects)) throw new Error("Missing project objects");
+				const objects = normalizeProjectObjects(data.objects);
+				if (!objects.length) throw new Error("No valid project objects");
+				pushHistory();
 				project.name = data.name || project.name;
-				project.background = data.background || project.background;
-				project.objects = Array.isArray(data.objects) ? data.objects : project.objects;
+				project.background = cleanColor(data.background, project.background);
+				project.objects = objects;
 				project.objects.filter((object) => object.type === "image").forEach((object) => void loadImage(object.src));
 				selectObject(null);
 				setStatus("Projet chargé.");
@@ -1494,9 +2141,11 @@
 
 	wireAssets();
 	wireEvents();
+	wireTooltips();
 	project.objects.filter((object) => object.type === "image").forEach((object) => void loadImage(object.src));
 	setupCanvasSize();
 	updateInspector();
+	updateHistoryButtons();
 	document.fonts?.ready.then(() => scheduleRender());
 </script>
 
@@ -1688,7 +2337,8 @@
 	}
 
 	.file-action input,
-	.upload-button input {
+	.upload-button input,
+	.file-input-hidden {
 		position: absolute;
 		width: 1px;
 		height: 1px;
@@ -2193,7 +2843,14 @@
 		gap: 4px;
 		padding-left: 20px;
 		border-left: 1px dashed var(--proto-line-hot);
+		text-decoration: none;
 		line-height: 1.1;
+		transition: border-color 0.14s, transform 0.14s;
+	}
+
+	.topbar__festival:hover {
+		border-left-color: var(--proto-brass);
+		transform: translateY(-1px);
 	}
 
 	.topbar__festival small {
@@ -2212,6 +2869,15 @@
 		font-weight: 400;
 		letter-spacing: 0.5px;
 		text-shadow: 0 1px 0 rgba(0, 0, 0, 0.6);
+	}
+
+	.topbar__festival-action {
+		color: var(--proto-ink);
+		font-family: var(--font-ui);
+		font-size: 12px;
+		font-weight: 800;
+		letter-spacing: 1px;
+		text-transform: uppercase;
 	}
 
 	.topbar__spacer {
@@ -2284,6 +2950,11 @@
 		background: linear-gradient(180deg, #221808 0%, #150d05 100%);
 	}
 
+	.topbar__action:disabled {
+		opacity: 0.38;
+		cursor: not-allowed;
+	}
+
 	.topbar__actions {
 		display: contents;
 	}
@@ -2294,6 +2965,135 @@
 	}
 
 	.mobile-backdrop {
+		display: none;
+	}
+
+	.tour-overlay {
+		position: fixed;
+		inset: 0;
+		z-index: 80;
+		pointer-events: none;
+	}
+
+	.tour-overlay::before {
+		content: "";
+		position: absolute;
+		inset: 0;
+		background: rgba(7, 4, 2, 0.56);
+		backdrop-filter: blur(1px);
+	}
+
+	.tour-overlay[hidden] {
+		display: none;
+	}
+
+	.tour-spotlight {
+		position: fixed;
+		z-index: 81;
+		border: 2px solid var(--proto-yellow);
+		border-radius: 7px;
+		box-shadow:
+			0 0 0 9999px rgba(7, 4, 2, 0.48),
+			0 0 24px rgba(230, 185, 74, 0.42);
+		transition: left 0.18s ease, top 0.18s ease, width 0.18s ease, height 0.18s ease;
+	}
+
+	.tour-card {
+		position: fixed;
+		z-index: 82;
+		width: min(360px, calc(100vw - 20px));
+		padding: 18px;
+		border: 1px solid rgba(216, 168, 58, 0.45);
+		border-radius: 6px;
+		background:
+			linear-gradient(180deg, rgba(42, 30, 16, 0.98) 0%, rgba(20, 13, 6, 0.98) 100%);
+		color: var(--proto-ink);
+		box-shadow:
+			0 18px 42px rgba(0, 0, 0, 0.7),
+			inset 0 1px 0 rgba(216, 168, 58, 0.12);
+		pointer-events: auto;
+	}
+
+	.tour-card__meta {
+		margin-bottom: 8px;
+		color: var(--proto-brass);
+		font-family: var(--font-ui);
+		font-size: 12px;
+		font-weight: 800;
+		letter-spacing: 1px;
+		text-transform: uppercase;
+	}
+
+	.tour-card h2 {
+		margin: 0 0 8px;
+		color: var(--proto-yellow);
+		font-family: var(--font-display);
+		font-size: 22px;
+		font-weight: 400;
+		line-height: 1.05;
+	}
+
+	.tour-card p {
+		margin: 0;
+		color: var(--proto-ink);
+		font-family: var(--font-body);
+		font-size: 14px;
+		line-height: 1.45;
+	}
+
+	.tour-card__actions {
+		display: flex;
+		justify-content: flex-end;
+		gap: 8px;
+		margin-top: 16px;
+	}
+
+	.tour-card__button {
+		min-height: 38px;
+		padding: 8px 13px;
+		border: 1px solid #6b4a18;
+		border-radius: 4px;
+		background: linear-gradient(180deg, #e6b94a 0%, #8a5a18 100%);
+		color: #1f0f02;
+		font-family: var(--font-ui);
+		font-size: 13px;
+		font-weight: 800;
+		letter-spacing: 0.8px;
+		text-transform: uppercase;
+	}
+
+	.tour-card__button--ghost {
+		border-color: var(--proto-line);
+		background: transparent;
+		color: var(--proto-ink);
+	}
+
+	.tour-card__button:disabled {
+		opacity: 0.35;
+		cursor: not-allowed;
+	}
+
+	.ui-tooltip {
+		position: fixed;
+		z-index: 130;
+		max-width: min(280px, calc(100vw - 20px));
+		padding: 8px 10px;
+		border: 1px solid rgba(255, 255, 255, 0.14);
+		border-radius: 8px;
+		background: rgba(18, 18, 20, 0.96);
+		color: var(--proto-ink);
+		font-family: var(--font-ui);
+		font-size: 12px;
+		font-weight: 650;
+		line-height: 1.35;
+		box-shadow:
+			0 12px 30px rgba(0, 0, 0, 0.38),
+			inset 0 1px 0 rgba(255, 255, 255, 0.06);
+		pointer-events: none;
+		backdrop-filter: blur(12px);
+	}
+
+	.ui-tooltip[hidden] {
 		display: none;
 	}
 
@@ -2310,6 +3110,7 @@
 
 	.file-action input,
 	.upload-button input,
+	.file-input-hidden,
 	.guide-toggle input {
 		position: absolute;
 		width: 1px;
@@ -2662,6 +3463,65 @@
 		box-shadow: inset 0 1px 0 rgba(216, 168, 58, 0.06);
 	}
 
+	.stage__history {
+		display: inline-flex;
+		gap: 4px;
+		padding: 4px;
+		border: 1px solid var(--proto-line);
+		border-radius: 4px;
+		background: linear-gradient(180deg, #221808 0%, #150d05 100%);
+		box-shadow: inset 0 1px 0 rgba(216, 168, 58, 0.06);
+	}
+
+	.stage__history button {
+		display: inline-grid;
+		place-items: center;
+		width: 36px;
+		min-width: 36px;
+		min-height: 36px;
+		padding: 0;
+		border: 0;
+		border-radius: 3px;
+		background: transparent;
+		color: var(--proto-ink);
+		font-family: var(--font-ui);
+		font-size: 16px;
+		font-weight: 800;
+		box-shadow: none;
+	}
+
+	.stage__history button:hover:not(:disabled) {
+		background: rgba(216, 168, 58, 0.1);
+		color: var(--proto-yellow);
+	}
+
+	.stage__history button:disabled {
+		opacity: 0.32;
+		cursor: not-allowed;
+	}
+
+	.stage__tour-button {
+		display: inline-grid;
+		place-items: center;
+		width: 44px;
+		min-width: 44px;
+		min-height: 44px;
+		padding: 0;
+		border: 1px solid var(--proto-line);
+		border-radius: 4px;
+		background: linear-gradient(180deg, #221808 0%, #150d05 100%);
+		color: var(--proto-yellow);
+		font-family: var(--font-ui);
+		font-size: 15px;
+		font-weight: 900;
+		box-shadow: inset 0 1px 0 rgba(216, 168, 58, 0.08), 0 1px 0 rgba(0, 0, 0, 0.55);
+	}
+
+	.stage__tour-button:hover {
+		border-color: var(--proto-brass);
+		background: linear-gradient(180deg, #3a2a18 0%, #221708 100%);
+	}
+
 	.stage__topbar .segment button {
 		min-height: 36px;
 		padding: 6px 18px;
@@ -2828,6 +3688,82 @@
 		background: transparent;
 	}
 
+	.selection-toolbar {
+		position: absolute;
+		z-index: 8;
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		min-height: 40px;
+		padding: 4px;
+		border: 1px solid rgba(216, 168, 58, 0.42);
+		border-radius: 4px;
+		background: rgba(22, 15, 8, 0.94);
+		box-shadow:
+			0 10px 24px rgba(0, 0, 0, 0.55),
+			inset 0 1px 0 rgba(216, 168, 58, 0.14);
+		transform: translate(-50%, calc(-100% - 14px));
+		backdrop-filter: blur(5px);
+		touch-action: manipulation;
+	}
+
+	.selection-toolbar[hidden] {
+		display: none;
+	}
+
+	.selection-toolbar__button,
+	.selection-toolbar__swatch {
+		display: inline-grid;
+		place-items: center;
+		width: 32px;
+		min-width: 32px;
+		min-height: 32px;
+		padding: 0;
+		border: 1px solid transparent;
+		border-radius: 3px;
+		background: transparent;
+		color: var(--proto-ink);
+		font-family: var(--font-ui);
+		font-size: 14px;
+		font-weight: 800;
+		line-height: 1;
+		box-shadow: none;
+	}
+
+	.selection-toolbar__button:hover,
+	.selection-toolbar__swatch:hover {
+		border-color: var(--proto-brass);
+		background: rgba(216, 168, 58, 0.1);
+		color: var(--proto-yellow);
+	}
+
+	.selection-toolbar__button--danger {
+		color: #df8064;
+	}
+
+	.selection-toolbar__swatch input {
+		width: 22px;
+		height: 22px;
+		padding: 0;
+		border: 0;
+		background: transparent;
+		cursor: pointer;
+	}
+
+	.selection-toolbar__divider {
+		width: 1px;
+		height: 24px;
+		background: var(--proto-line);
+	}
+
+	.selection-toolbar[data-kind="text"] .image-controls,
+	.selection-toolbar[data-kind="image"] .color-controls,
+	.selection-toolbar[data-kind="image"] .text-controls,
+	.selection-toolbar[data-kind="rect"] .text-controls,
+	.selection-toolbar[data-kind="rect"] .image-controls {
+		display: none;
+	}
+
 	.canvas-delete {
 		position: absolute;
 		display: inline-flex;
@@ -2963,6 +3899,18 @@
 		font-weight: 400;
 	}
 
+	.inspector-primary-note {
+		margin: 0 0 14px;
+		padding: 10px 12px;
+		border: 1px dashed rgba(177, 138, 72, 0.42);
+		border-radius: 3px;
+		background: rgba(20, 12, 6, 0.45);
+		color: var(--proto-muted);
+		font-family: var(--font-body);
+		font-size: 12px;
+		line-height: 1.35;
+	}
+
 	.field {
 		display: grid;
 		gap: 6px;
@@ -3063,6 +4011,26 @@
 		gap: 4px;
 	}
 
+	.advanced-controls {
+		margin-top: 14px;
+		border-top: 1px dashed var(--proto-line);
+		padding-top: 12px;
+	}
+
+	.advanced-controls summary {
+		cursor: pointer;
+		color: var(--proto-yellow);
+		font-family: var(--font-ui);
+		font-size: 13px;
+		font-weight: 800;
+		letter-spacing: 1px;
+		text-transform: uppercase;
+	}
+
+	.advanced-controls .layer-actions {
+		margin-top: 10px;
+	}
+
 	.print-spec {
 		display: grid;
 		gap: 6px;
@@ -3106,6 +4074,434 @@
 
 	.inspector.empty > * {
 		opacity: 0.38;
+	}
+
+	/* Modern UI skin with a restrained VHS accent */
+	:root {
+		--proto-bg: #111112;
+		--proto-panel: rgba(24, 24, 27, 0.94);
+		--proto-panel-2: #202024;
+		--proto-line: rgba(255, 255, 255, 0.12);
+		--proto-line-hot: rgba(103, 232, 249, 0.32);
+		--proto-ink: #f7f7f8;
+		--proto-muted: #a7a7b0;
+		--proto-cyan: #67e8f9;
+		--proto-pink: #f472b6;
+		--proto-yellow: #f8d66d;
+		--proto-emerald: #5eead4;
+		--proto-burgundy: #fb7185;
+		--proto-brass: #8bd3dd;
+		--font-display: "Oswald", "Roboto Condensed", "Helvetica Neue", Arial, sans-serif;
+		--font-body: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+		--font-ui: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+	}
+
+	body {
+		background:
+			linear-gradient(135deg, rgba(103, 232, 249, 0.1), transparent 26rem),
+			linear-gradient(225deg, rgba(244, 114, 182, 0.08), transparent 24rem),
+			linear-gradient(180deg, #111112 0%, #171719 58%, #0f0f10 100%);
+		color: var(--proto-ink);
+	}
+
+	body::before {
+		background-image:
+			linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+			linear-gradient(90deg, rgba(255, 255, 255, 0.028) 1px, transparent 1px);
+		background-size: 28px 28px;
+		mask-image: linear-gradient(180deg, transparent 0%, black 16%, black 82%, transparent 100%);
+		opacity: 0.55;
+	}
+
+	body::after {
+		background:
+			radial-gradient(ellipse at 50% 50%, transparent 58%, rgba(0, 0, 0, 0.28) 100%);
+	}
+
+	.topbar {
+		border-bottom-color: rgba(255, 255, 255, 0.1);
+		background: rgba(18, 18, 20, 0.86);
+		box-shadow:
+			inset 0 -1px 0 rgba(255, 255, 255, 0.04),
+			0 12px 34px rgba(0, 0, 0, 0.34);
+		backdrop-filter: blur(14px);
+	}
+
+	.brand {
+		border-radius: 6px;
+		background:
+			linear-gradient(90deg, rgba(103, 232, 249, 0.16), rgba(244, 114, 182, 0.12));
+		box-shadow:
+			inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+			0 1px 10px rgba(0, 0, 0, 0.24);
+		text-shadow: none;
+	}
+
+	.brand__logo {
+		color: #ffffff;
+		font-family: var(--font-ui);
+		font-size: 16px;
+		font-weight: 800;
+		letter-spacing: 0.12em;
+	}
+
+	.brand__sub {
+		color: var(--proto-cyan);
+		font-family: var(--font-ui);
+		font-size: 11px;
+		font-weight: 800;
+		letter-spacing: 0.12em;
+	}
+
+	.topbar__festival {
+		border-left-color: rgba(255, 255, 255, 0.12);
+		padding: 9px 14px 10px 18px;
+		border-radius: 8px;
+		background:
+			linear-gradient(135deg, rgba(244, 114, 182, 0.14), rgba(103, 232, 249, 0.08)),
+			rgba(255, 255, 255, 0.035);
+		box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+	}
+
+	.topbar__festival:hover {
+		border-left-color: rgba(244, 114, 182, 0.72);
+		background:
+			linear-gradient(135deg, rgba(244, 114, 182, 0.22), rgba(103, 232, 249, 0.12)),
+			rgba(255, 255, 255, 0.05);
+	}
+
+	.topbar__festival small {
+		color: var(--proto-muted);
+		font-family: var(--font-ui);
+		font-size: 11px;
+		letter-spacing: 0.08em;
+	}
+
+	.topbar__festival strong {
+		color: var(--proto-ink);
+		font-family: var(--font-ui);
+		font-size: 12px;
+		font-weight: 700;
+		letter-spacing: 0.04em;
+		text-shadow: none;
+	}
+
+	.topbar__festival-action {
+		color: var(--proto-cyan);
+		font-family: var(--font-ui);
+		font-size: 11px;
+		font-weight: 850;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+	}
+
+	.topbar__action,
+	.btn,
+	.file-action,
+	.upload-button,
+	.stage__tour-button,
+	.stage__contest-link,
+	.stage__rail-toggle {
+		border-color: rgba(255, 255, 255, 0.12);
+		border-radius: 7px;
+		background: rgba(255, 255, 255, 0.055);
+		color: var(--proto-ink);
+		font-family: var(--font-ui);
+		font-size: 13px;
+		font-weight: 700;
+		letter-spacing: 0.02em;
+		text-transform: none;
+		text-shadow: none;
+		box-shadow: none;
+	}
+
+	.topbar__action:hover,
+	.btn:hover,
+	.file-action:hover,
+	.upload-button:hover,
+	.stage__tour-button:hover,
+	.stage__contest-link:hover,
+	.stage__rail-toggle:hover {
+		border-color: rgba(103, 232, 249, 0.55);
+		background: rgba(103, 232, 249, 0.11);
+		color: #ffffff;
+	}
+
+	.topbar__action--primary,
+	.btn--neon,
+	.tour-card__button {
+		border-color: rgba(103, 232, 249, 0.46);
+		background: linear-gradient(135deg, rgba(103, 232, 249, 0.92), rgba(94, 234, 212, 0.78));
+		color: #081012;
+		text-shadow: none;
+		box-shadow: 0 10px 26px rgba(103, 232, 249, 0.16);
+	}
+
+	.topbar__action--primary:hover,
+	.btn--neon:hover,
+	.tour-card__button:hover {
+		border-color: rgba(103, 232, 249, 0.72);
+		background: linear-gradient(135deg, #8cf3ff, #7df5df);
+		color: #071012;
+	}
+
+	.stage__contest-link {
+		text-decoration: none;
+	}
+
+	.stage__contest-link {
+		display: none;
+		flex: 0 0 auto;
+		flex-direction: column;
+		justify-content: center;
+		min-height: 44px;
+		padding: 6px 12px;
+		border: 1px solid rgba(244, 114, 182, 0.46);
+		background:
+			linear-gradient(135deg, rgba(244, 114, 182, 0.2), rgba(103, 232, 249, 0.12)),
+			rgba(255, 255, 255, 0.05);
+		box-shadow: 0 10px 22px rgba(0, 0, 0, 0.18);
+		line-height: 1;
+	}
+
+	.stage__contest-link span {
+		color: var(--proto-muted);
+		font-size: 10px;
+		font-weight: 800;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+	}
+
+	.stage__contest-link strong {
+		margin-top: 3px;
+		color: var(--proto-ink);
+		font-size: 13px;
+		font-weight: 800;
+	}
+
+	.stage__contest-link:hover span,
+	.stage__contest-link:hover strong {
+		color: #ffffff;
+	}
+
+	.topbar__action--secondary,
+	.btn--ghost,
+	.tour-card__button--ghost {
+		background: rgba(255, 255, 255, 0.04);
+		color: var(--proto-ink);
+		text-shadow: none;
+		box-shadow: none;
+	}
+
+	.tour-card__button--ghost:hover {
+		border-color: rgba(103, 232, 249, 0.65);
+		background: rgba(103, 232, 249, 0.12);
+		color: #ffffff;
+	}
+
+	.tour-card__button--ghost:disabled {
+		color: rgba(247, 247, 248, 0.46);
+	}
+
+	.rail {
+		background: rgba(20, 20, 22, 0.88);
+		border-color: rgba(255, 255, 255, 0.1);
+		backdrop-filter: blur(16px);
+		scrollbar-color: rgba(103, 232, 249, 0.55) rgba(255, 255, 255, 0.04);
+	}
+
+	.rail--left,
+	.rail--right {
+		box-shadow: none;
+	}
+
+	.section {
+		border-bottom-color: rgba(255, 255, 255, 0.08);
+	}
+
+	.section__dot {
+		width: 7px;
+		height: 7px;
+		background: var(--proto-cyan);
+		box-shadow: 0 0 14px rgba(103, 232, 249, 0.46);
+		animation: none;
+	}
+
+	.section__title {
+		color: #ffffff;
+		font-family: var(--font-ui);
+		font-size: 12px;
+		font-weight: 800;
+		letter-spacing: 0.08em;
+		text-shadow: none;
+	}
+
+	.theme,
+	.layout,
+	.asset,
+	.rating {
+		border-color: rgba(255, 255, 255, 0.1);
+		border-radius: 8px;
+		background: rgba(255, 255, 255, 0.045);
+		box-shadow: none;
+	}
+
+	.theme:hover,
+	.layout:hover,
+	.asset:hover,
+	.rating:hover {
+		border-color: rgba(103, 232, 249, 0.55);
+		background: rgba(103, 232, 249, 0.08);
+	}
+
+	.theme[data-active="true"],
+	.layout[data-active="true"] {
+		border-color: var(--proto-cyan);
+		box-shadow: 0 0 0 1px rgba(103, 232, 249, 0.32);
+	}
+
+	.theme__label,
+	.layout__name {
+		color: #ffffff;
+		font-family: var(--font-ui);
+		font-size: 11px;
+		font-weight: 800;
+		letter-spacing: 0.06em;
+	}
+
+	.stage-shell {
+		background: transparent;
+	}
+
+	.stage__topbar .segment,
+	.stage__history {
+		border-color: rgba(255, 255, 255, 0.1);
+		border-radius: 8px;
+		background: rgba(255, 255, 255, 0.045);
+		box-shadow: none;
+	}
+
+	.stage__topbar .segment button,
+	.stage__history button {
+		color: var(--proto-muted);
+		font-family: var(--font-ui);
+		font-size: 13px;
+		font-weight: 800;
+		letter-spacing: 0.04em;
+		text-shadow: none;
+	}
+
+	.stage__topbar .segment button:hover,
+	.stage__history button:hover:not(:disabled) {
+		background: rgba(255, 255, 255, 0.06);
+		color: var(--proto-ink);
+	}
+
+	.stage__topbar .segment button.active {
+		background: rgba(103, 232, 249, 0.14);
+		color: var(--proto-cyan);
+		box-shadow: inset 0 -2px 0 var(--proto-cyan);
+	}
+
+	.stage__hint,
+	.statusbar,
+	.inspector-primary-note {
+		border-color: rgba(255, 255, 255, 0.1);
+		border-radius: 8px;
+		background: rgba(255, 255, 255, 0.045);
+		color: var(--proto-muted);
+		font-family: var(--font-body);
+		font-style: normal;
+	}
+
+	.stage__zoom,
+	.selection-toolbar,
+	.tour-card {
+		border-color: rgba(255, 255, 255, 0.12);
+		border-radius: 10px;
+		background: rgba(22, 22, 25, 0.94);
+		box-shadow:
+			0 18px 48px rgba(0, 0, 0, 0.38),
+			inset 0 1px 0 rgba(255, 255, 255, 0.06);
+		backdrop-filter: blur(16px);
+	}
+
+	.selection-toolbar__button,
+	.selection-toolbar__swatch,
+	.stage__zoom button {
+		border-radius: 7px;
+		color: var(--proto-ink);
+		font-family: var(--font-ui);
+		text-shadow: none;
+	}
+
+	.selection-toolbar__button:hover,
+	.selection-toolbar__swatch:hover,
+	.stage__zoom button:hover {
+		border-color: rgba(103, 232, 249, 0.44);
+		background: rgba(103, 232, 249, 0.12);
+		color: #ffffff;
+	}
+
+	.selection-toolbar__button--danger,
+	.btn--danger {
+		color: #fb7185;
+		border-color: rgba(251, 113, 133, 0.28);
+	}
+
+	.selection-toolbar__divider {
+		background: rgba(255, 255, 255, 0.12);
+	}
+
+	.input,
+	.textarea,
+	input[type="number"],
+	select,
+	textarea,
+	input[type="color"] {
+		border-color: rgba(255, 255, 255, 0.11);
+		border-radius: 8px;
+		background: rgba(255, 255, 255, 0.055);
+		color: var(--proto-ink);
+		font-family: var(--font-body);
+		box-shadow: none;
+	}
+
+	.input:focus,
+	.textarea:focus,
+	input[type="number"]:focus {
+		border-color: rgba(103, 232, 249, 0.72);
+		box-shadow: 0 0 0 3px rgba(103, 232, 249, 0.15);
+	}
+
+	.label,
+	.slider-row label,
+	.position-grid label,
+	.selected-row {
+		color: var(--proto-muted);
+		font-family: var(--font-ui);
+		letter-spacing: 0.04em;
+	}
+
+	.selected-row strong,
+	.advanced-controls summary,
+	.tour-card h2 {
+		color: var(--proto-cyan);
+		font-family: var(--font-ui);
+		font-weight: 800;
+		letter-spacing: 0.01em;
+	}
+
+	.tour-spotlight {
+		border-color: var(--proto-cyan);
+		box-shadow:
+			0 0 0 9999px rgba(8, 8, 10, 0.52),
+			0 0 28px rgba(103, 232, 249, 0.34);
+	}
+
+	.tour-card__meta {
+		color: var(--proto-muted);
+		font-family: var(--font-ui);
 	}
 
 	@media (max-width: 1100px) {
@@ -3291,24 +4687,56 @@
 		.stage-shell {
 			grid-area: main;
 			min-height: 0;
-			padding: 12px 8px 8px;
+			padding: 8px 8px 8px;
 			overflow: hidden;
 		}
 
 		.stage__topbar {
-			gap: 8px;
-			margin-bottom: 8px;
+			display: grid;
+			grid-template-columns: 50px 68px 40px minmax(70px, 1fr) 50px;
+			gap: 6px;
+			margin-bottom: 6px;
 			padding: 0;
 		}
 
+		.stage__rail-toggle--left {
+			grid-column: 1;
+			grid-row: 1;
+		}
+
+		.stage__history {
+			grid-column: 2;
+			grid-row: 1;
+		}
+
+		.stage__tour-button {
+			grid-column: 3;
+			grid-row: 1;
+		}
+
+		.stage__contest-link {
+			grid-column: 4;
+			grid-row: 1;
+			display: inline-flex;
+			min-width: 0;
+		}
+
+		.stage__rail-toggle--right {
+			grid-column: 5;
+			grid-row: 1;
+		}
+
 		.stage__topbar .segment {
-			flex: 1 1 auto;
+			grid-column: 1 / -1;
+			grid-row: 2;
+			width: 100%;
 			justify-content: center;
 		}
 
 		.stage__topbar .segment button {
+			flex: 1 1 0;
 			min-height: 36px;
-			padding: 4px 10px;
+			padding: 4px 8px;
 			font-size: 12px;
 		}
 
@@ -3319,9 +4747,9 @@
 			align-items: center;
 			justify-content: center;
 			gap: 2px;
-			width: 56px;
-			min-width: 56px;
-			min-height: 44px;
+			width: 50px;
+			min-width: 50px;
+			min-height: 40px;
 			padding: 4px;
 			border: 1px solid var(--proto-line);
 			border-radius: 4px;
@@ -3335,6 +4763,25 @@
 			text-shadow: 0 1px 0 rgba(0, 0, 0, 0.55);
 			box-shadow: inset 0 1px 0 rgba(216, 168, 58, 0.08), 0 1px 0 rgba(0, 0, 0, 0.55);
 			cursor: pointer;
+		}
+
+		.stage__history {
+			width: 68px;
+			min-width: 0;
+			padding: 3px;
+		}
+
+		.stage__history button {
+			width: 29px;
+			min-width: 29px;
+			min-height: 32px;
+			font-size: 14px;
+		}
+
+		.stage__tour-button {
+			width: 40px;
+			min-width: 40px;
+			min-height: 40px;
 		}
 
 		.stage__rail-toggle .stage__rail-icon {
@@ -3354,7 +4801,13 @@
 		}
 
 		.stage-scroller {
-			padding: 8px 4px;
+			overflow: hidden;
+			padding: 8px 0 6px;
+		}
+
+		.canvas-stage {
+			width: 100%;
+			min-height: 0;
 		}
 
 		.stage__zoom {
@@ -3366,6 +4819,26 @@
 			flex-direction: column;
 			gap: 4px;
 			font-size: 10px;
+		}
+	}
+
+	@media (max-width: 520px) {
+		.stage__contest-link {
+			min-height: 40px;
+			padding: 6px 9px;
+		}
+
+		.stage__contest-link span {
+			display: none;
+		}
+
+		.stage__contest-link strong {
+			margin-top: 0;
+			font-size: 12px;
+		}
+
+		.stage__topbar .segment button {
+			padding-inline: 8px;
 		}
 	}
 </style>

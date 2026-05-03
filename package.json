@@ -10,7 +10,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "deploy": "astro build && wrangler pages deploy ./dist --project-name=vhs-studio --branch=main --commit-dirty=true"
+    "deploy": "astro build && wrangler pages deploy ./dist --project-name=vhs-studio --branch=main"
   },
   "dependencies": {
     "astro": "^6.2.1",

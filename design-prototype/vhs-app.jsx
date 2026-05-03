@@ -948,7 +948,7 @@ function App() {
       {/* Tweaks panel */}
       {TweaksPanel && setTweak && (
         <TweaksPanel title="Tweaks">
-          <TweakSection title="Effets VHS">
+          <TweakSection label="Effets VHS">
             <TweakSlider label="Scanlines" value={tweaks.scanlineIntensity} min={0} max={1} step={0.05}
               onChange={(v) => setTweak('scanlineIntensity', v)} />
             <TweakSlider label="Grain" value={tweaks.grainIntensity} min={0} max={1} step={0.05}
@@ -958,7 +958,7 @@ function App() {
             <TweakToggle label="Vignettage" value={tweaks.vignette}
               onChange={(v) => setTweak('vignette', v)} />
           </TweakSection>
-          <TweakSection title="Densité">
+          <TweakSection label="Densité">
             <TweakRadio label="Contrôles" value={tweaks.density} options={[{ value: 'comfy', label: 'Confort' }, { value: 'compact', label: 'Compact' }]}
               onChange={(v) => setTweak('density', v)} />
           </TweakSection>
