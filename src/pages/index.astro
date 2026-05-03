@@ -403,90 +403,137 @@
 		},
 	};
 
-	let activeTheme = "neon";
-	let activeLayout = "classic";
+	type ThemeKey = keyof typeof THEMES;
+	type LayoutKey = "classic" | "bigtype" | "poster" | "split";
+	type ZoneKey = keyof typeof ZONES;
+	type Align = "left" | "center" | "right";
+	type Fit = "contain" | "cover";
+	type Vec = { x: number; y: number };
+	type Size = { w: number; h: number };
 
-	const canvas = document.querySelector("#coverCanvas");
-	const ctx = canvas.getContext("2d");
-	const stage = document.querySelector("#dropStage");
-	const stageScroller = document.querySelector("#stageScroller");
-	const assetTray = document.querySelector("#assetTray");
-	const ratingsTray = document.querySelector("#ratingsTray");
-	const statusbar = document.querySelector("#statusbar");
-	const selectedLabel = document.querySelector("#selectedLabel");
-	const inspector = document.querySelector("#inspector");
-	const assetCount = document.querySelector("#assetCount");
-	const undoAction = document.querySelector("#undoAction");
-	const redoAction = document.querySelector("#redoAction");
-	const undoActionStage = document.querySelector("#undoActionStage");
-	const redoActionStage = document.querySelector("#redoActionStage");
-	const startTour = document.querySelector("#startTour");
-	const startTourStage = document.querySelector("#startTourStage");
-	const saveProject = document.querySelector("#saveProject");
-	const loadProject = document.querySelector("#loadProject");
-	const exportPng = document.querySelector("#exportPng");
-	const exportPdf = document.querySelector("#exportPdf");
-	const addTitle = document.querySelector("#addTitle");
-	const addTextButton = document.querySelector("#addText");
-	const addBox = document.querySelector("#addBox");
-	const imageUploadButton = document.querySelector("#imageUploadButton");
-	const imageUpload = document.querySelector("#imageUpload");
-	const toggleGuides = document.querySelector("#toggleGuides");
-	const fitZoom = document.querySelector("#fitZoom");
-	const textContent = document.querySelector("#textContent");
-	const fontFamily = document.querySelector("#fontFamily");
-	const fontSize = document.querySelector("#fontSize");
-	const fillColor = document.querySelector("#fillColor");
-	const opacity = document.querySelector("#opacity");
-	const rotation = document.querySelector("#rotation");
-	const textAlign = document.querySelector("#textAlign");
-	const imageFit = document.querySelector("#imageFit");
-	const replaceImage = document.querySelector("#replaceImage");
-	const replaceImageInput = document.querySelector("#replaceImageInput");
-	const posX = document.querySelector("#posX");
-	const posY = document.querySelector("#posY");
-	const posW = document.querySelector("#posW");
-	const posH = document.querySelector("#posH");
-	const bringForward = document.querySelector("#bringForward");
-	const sendBackward = document.querySelector("#sendBackward");
-	const duplicateLayer = document.querySelector("#duplicateLayer");
-	const deleteLayer = document.querySelector("#deleteLayer");
-	const canvasDelete = document.querySelector("#canvasDelete");
-	const selectionToolbar = document.querySelector("#selectionToolbar");
-	const quickAlign = document.querySelector("#quickAlign");
-	const quickColor = document.querySelector("#quickColor");
-	const quickFit = document.querySelector("#quickFit");
-	const quickBackward = document.querySelector("#quickBackward");
-	const quickForward = document.querySelector("#quickForward");
-	const quickDuplicate = document.querySelector("#quickDuplicate");
-	const quickDelete = document.querySelector("#quickDelete");
-	const tourOverlay = document.querySelector("#tourOverlay");
-	const tourSpotlight = document.querySelector("#tourSpotlight");
-	const tourCard = document.querySelector("#tourCard");
-	const tourMeta = document.querySelector("#tourMeta");
-	const tourTitle = document.querySelector("#tourTitle");
-	const tourBody = document.querySelector("#tourBody");
-	const tourSkip = document.querySelector("#tourSkip");
-	const tourPrev = document.querySelector("#tourPrev");
-	const tourNext = document.querySelector("#tourNext");
-	const uiTooltip = document.querySelector("#uiTooltip");
+	type BaseObject = {
+		id: string;
+		name: string;
+		x: number;
+		y: number;
+		w: number;
+		h: number;
+		opacity: number;
+		rotation: number;
+		locked: boolean;
+		layoutGenerated?: boolean;
+	};
+	type RectObject = BaseObject & { type: "rect"; fill: string; stroke: string };
+	type TextObject = BaseObject & {
+		type: "text";
+		content: string;
+		fontSize: number;
+		fill: string;
+		align: Align;
+		fontFamily: string;
+		shadow: string;
+	};
+	type ImageObject = BaseObject & { type: "image"; src: string; fit: Fit };
+	type ProjectObject = RectObject | TextObject | ImageObject;
+	type ProjectState = { name: string; background: string; objects: ProjectObject[] };
+	type Snapshot = ProjectState & { activeTheme: ThemeKey; activeLayout: LayoutKey; showGuides: boolean };
+
+	type ResizeRotateDrag = { id: string; handle: string; start: Vec; startAngle: number; original: ProjectObject; historyPushed: boolean };
+	type MoveDrag = { id: string; dx: number; dy: number; historyPushed: boolean };
+	type DragState = ResizeRotateDrag | MoveDrag;
+
+	type Handle = { name: string; x: number; y: number; type: "resize" | "rotate"; cursor: string };
+	type TourStep = { title: string; body: string; target: () => Element | null; prepare?: () => void };
+
+	let activeTheme: ThemeKey = "neon";
+	let activeLayout: LayoutKey = "classic";
+
+	const $ = <T extends Element>(selector: string): T => {
+		const element = document.querySelector(selector);
+		if (!element) throw new Error(`Missing element: ${selector}`);
+		return element as unknown as T;
+	};
+
+	const canvas = $<HTMLCanvasElement>("#coverCanvas");
+	const stage = $<HTMLDivElement>("#dropStage");
+	const stageScroller = $<HTMLDivElement>("#stageScroller");
+	const assetTray = $<HTMLDivElement>("#assetTray");
+	const ratingsTray = $<HTMLDivElement>("#ratingsTray");
+	const statusbar = $<HTMLDivElement>("#statusbar");
+	const selectedLabel = $<HTMLElement>("#selectedLabel");
+	const inspector = $<HTMLDivElement>("#inspector");
+	const assetCount = $<HTMLElement>("#assetCount");
+	const undoAction = $<HTMLButtonElement>("#undoAction");
+	const redoAction = $<HTMLButtonElement>("#redoAction");
+	const undoActionStage = $<HTMLButtonElement>("#undoActionStage");
+	const redoActionStage = $<HTMLButtonElement>("#redoActionStage");
+	const startTour = $<HTMLButtonElement>("#startTour");
+	const startTourStage = $<HTMLButtonElement>("#startTourStage");
+	const saveProject = $<HTMLButtonElement>("#saveProject");
+	const loadProject = $<HTMLInputElement>("#loadProject");
+	const exportPng = $<HTMLButtonElement>("#exportPng");
+	const exportPdf = $<HTMLButtonElement>("#exportPdf");
+	const addTitle = $<HTMLButtonElement>("#addTitle");
+	const addTextButton = $<HTMLButtonElement>("#addText");
+	const addBox = $<HTMLButtonElement>("#addBox");
+	const imageUploadButton = $<HTMLButtonElement>("#imageUploadButton");
+	const imageUpload = $<HTMLInputElement>("#imageUpload");
+	const toggleGuides = $<HTMLInputElement>("#toggleGuides");
+	const fitZoom = $<HTMLButtonElement>("#fitZoom");
+	const textContent = $<HTMLTextAreaElement>("#textContent");
+	const fontFamily = $<HTMLSelectElement>("#fontFamily");
+	const fontSize = $<HTMLInputElement>("#fontSize");
+	const fillColor = $<HTMLInputElement>("#fillColor");
+	const opacity = $<HTMLInputElement>("#opacity");
+	const rotation = $<HTMLInputElement>("#rotation");
+	const textAlign = $<HTMLSelectElement>("#textAlign");
+	const imageFit = $<HTMLSelectElement>("#imageFit");
+	const replaceImage = $<HTMLButtonElement>("#replaceImage");
+	const replaceImageInput = $<HTMLInputElement>("#replaceImageInput");
+	const posX = $<HTMLInputElement>("#posX");
+	const posY = $<HTMLInputElement>("#posY");
+	const posW = $<HTMLInputElement>("#posW");
+	const posH = $<HTMLInputElement>("#posH");
+	const bringForward = $<HTMLButtonElement>("#bringForward");
+	const sendBackward = $<HTMLButtonElement>("#sendBackward");
+	const duplicateLayer = $<HTMLButtonElement>("#duplicateLayer");
+	const deleteLayer = $<HTMLButtonElement>("#deleteLayer");
+	const canvasDelete = $<HTMLButtonElement>("#canvasDelete");
+	const selectionToolbar = $<HTMLDivElement>("#selectionToolbar");
+	const quickAlign = $<HTMLButtonElement>("#quickAlign");
+	const quickColor = $<HTMLInputElement>("#quickColor");
+	const quickFit = $<HTMLButtonElement>("#quickFit");
+	const quickBackward = $<HTMLButtonElement>("#quickBackward");
+	const quickForward = $<HTMLButtonElement>("#quickForward");
+	const quickDuplicate = $<HTMLButtonElement>("#quickDuplicate");
+	const quickDelete = $<HTMLButtonElement>("#quickDelete");
+	const tourOverlay = $<HTMLDivElement>("#tourOverlay");
+	const tourSpotlight = $<HTMLDivElement>("#tourSpotlight");
+	const tourCard = $<HTMLElement>("#tourCard");
+	const tourMeta = $<HTMLDivElement>("#tourMeta");
+	const tourTitle = $<HTMLHeadingElement>("#tourTitle");
+	const tourBody = $<HTMLParagraphElement>("#tourBody");
+	const tourSkip = $<HTMLButtonElement>("#tourSkip");
+	const tourPrev = $<HTMLButtonElement>("#tourPrev");
+	const tourNext = $<HTMLButtonElement>("#tourNext");
+	const uiTooltip = $<HTMLDivElement>("#uiTooltip");
 	let canvasDeleteConfirmTimer = 0;
 
-	let activeZone = "front";
-	let selectedId = null;
-	let pointerMode = null;
-	let dragState = null;
+	let activeZone: ZoneKey = "front";
+	let selectedId: string | null = null;
+	let pointerMode: "move" | "resize" | "rotate" | null = null;
+	let dragState: DragState | null = null;
 	let showGuides = true;
 	let raf = 0;
 	let currentScale = 1;
 	let inspectorEditPrimed = false;
 	let activeTourIndex = -1;
-	const historyPast = [];
-	const historyFuture = [];
+	const historyPast: Snapshot[] = [];
+	const historyFuture: Snapshot[] = [];
 	const HISTORY_LIMIT = 50;
-	const imageCache = new Map();
-	const imagePromises = new Map();
-	let tooltipAnchor = null;
+	const imageCache = new Map<string, HTMLImageElement>();
+	const imagePromises = new Map<string, Promise<HTMLImageElement>>();
+	let tooltipAnchor: HTMLElement | null = null;
 	const GENERATED_FRONT_LAYER_NAMES = new Set([
 		"Halo soleil",
 		"Horizon VHS",
@@ -503,7 +550,7 @@
 		"Réalisateur",
 	]);
 
-	const project = {
+	const project: ProjectState = {
 		name: "contre-fictions-vhs",
 		background: "#16052d",
 		objects: [
@@ -527,7 +574,7 @@
 		],
 	};
 
-	const TOUR_STEPS = [
+	const TOUR_STEPS: TourStep[] = [
 		{
 			title: "Commence par la jaquette",
 			body: "La zone centrale est ton espace de travail. Clique un élément pour le déplacer, le redimensionner ou le modifier.",
@@ -572,7 +619,7 @@
 		},
 	];
 
-	const HELP_TEXT = {
+	const HELP_TEXT: Record<string, string> = {
 		undoAction: "Annule la dernière modification.",
 		redoAction: "Rétablit la modification annulée.",
 		undoActionStage: "Annule la dernière modification.",
@@ -608,21 +655,21 @@
 		tourNext: "Passe à l'étape suivante.",
 	};
 
-	const THEME_HELP = {
+	const THEME_HELP: Record<string, string> = {
 		neon: "Applique une ambiance VHS néon.",
 		rental: "Applique un style vidéoclub plus chaleureux.",
 		scifi: "Applique une ambiance science-fiction.",
 		horror: "Applique une ambiance horreur sombre.",
 	};
 
-	const LAYOUT_HELP = {
+	const LAYOUT_HELP: Record<string, string> = {
 		classic: "Image principale au centre, titre en bas.",
 		bigtype: "Grand titre dominant sur le recto.",
 		poster: "Affiche plein cadre sur la face avant.",
 		split: "Bandeau image en haut, titre en dessous.",
 	};
 
-	const ZONE_HELP = {
+	const ZONE_HELP: Record<string, string> = {
 		front: "Place les nouveaux éléments sur le recto.",
 		back: "Place les nouveaux éléments sur le verso.",
 		spine: "Place les nouveaux éléments sur la tranche.",
@@ -639,7 +686,7 @@
 		};
 	}
 
-	function restoreProjectSnapshot(snapshot) {
+	function restoreProjectSnapshot(snapshot: Snapshot) {
 		project.name = snapshot.name || project.name;
 		project.background = snapshot.background || project.background;
 		project.objects = structuredClone(snapshot.objects || project.objects);
@@ -647,11 +694,13 @@
 		activeLayout = snapshot.activeLayout || activeLayout;
 		showGuides = snapshot.showGuides ?? showGuides;
 		toggleGuides.checked = showGuides;
-		project.objects.filter((object) => object.type === "image").forEach((object) => void loadImage(object.src).catch(() => null));
-		document.querySelectorAll("[data-theme]").forEach((button) => {
+		project.objects
+			.filter((object): object is ImageObject => object.type === "image")
+			.forEach((object) => void loadImage(object.src).catch(() => null));
+		document.querySelectorAll<HTMLElement>("[data-theme]").forEach((button) => {
 			button.dataset.active = String(button.dataset.theme === activeTheme);
 		});
-		document.querySelectorAll("[data-layout]").forEach((button) => {
+		document.querySelectorAll<HTMLElement>("[data-layout]").forEach((button) => {
 			button.dataset.active = String(button.dataset.layout === activeLayout);
 		});
 		selectObject(null);
@@ -671,42 +720,47 @@
 		document.querySelector("#loadProject")?.closest("label")?.setAttribute("data-help", "Charge un projet VHS Studio sauvegardé.");
 		toggleGuides.closest("label")?.setAttribute("data-help", "Affiche ou masque les repères d'impression.");
 		quickColor.closest("label")?.setAttribute("data-help", "Change la couleur de l'élément sélectionné.");
-		document.querySelectorAll("[data-theme]").forEach((button) => {
-			button.dataset.help = THEME_HELP[button.dataset.theme] || "Change le thème visuel.";
+		document.querySelectorAll<HTMLElement>("[data-theme]").forEach((button) => {
+			const key = button.dataset.theme;
+			button.dataset.help = (key && THEME_HELP[key]) || "Change le thème visuel.";
 		});
-		document.querySelectorAll("[data-layout]").forEach((button) => {
-			button.dataset.help = LAYOUT_HELP[button.dataset.layout] || "Change la mise en page du recto.";
+		document.querySelectorAll<HTMLElement>("[data-layout]").forEach((button) => {
+			const key = button.dataset.layout;
+			button.dataset.help = (key && LAYOUT_HELP[key]) || "Change la mise en page du recto.";
 		});
-		document.querySelectorAll("[data-zone]").forEach((button) => {
-			button.dataset.help = ZONE_HELP[button.dataset.zone] || "Choisit la zone active.";
+		document.querySelectorAll<HTMLElement>("[data-zone]").forEach((button) => {
+			const key = button.dataset.zone;
+			button.dataset.help = (key && ZONE_HELP[key]) || "Choisit la zone active.";
 		});
 	}
 
-	function tooltipTarget(target) {
-		return target.closest("[data-help], button[title], label[title], .asset[title], .rating[title]");
+	function tooltipTarget(target: EventTarget | null): HTMLElement | null {
+		if (!(target instanceof Element)) return null;
+		return target.closest<HTMLElement>("[data-help], button[title], label[title], .asset[title], .rating[title]");
 	}
 
-	function tooltipText(element) {
+	function tooltipText(element: HTMLElement | null) {
 		return element?.dataset?.help || element?.getAttribute("title") || element?.getAttribute("aria-label") || element?.textContent?.trim() || "";
 	}
 
-	function showTooltip(event) {
+	function showTooltip(event: Event) {
 		const target = tooltipTarget(event.target);
 		const textValue = tooltipText(target);
-		if (!target || !textValue || target.disabled || tourOverlay.hidden === false) return;
+		if (!target || !textValue || (target as HTMLButtonElement).disabled || tourOverlay.hidden === false) return;
 		tooltipAnchor = target;
 		uiTooltip.textContent = textValue;
 		uiTooltip.hidden = false;
 		positionTooltip(event);
 	}
 
-	function positionTooltip(event = null) {
+	function positionTooltip(event: Event | null = null) {
 		if (!tooltipAnchor || uiTooltip.hidden) return;
 		const rect = tooltipAnchor.getBoundingClientRect();
 		const tooltipRect = uiTooltip.getBoundingClientRect();
-		const fromPointer = event?.clientX && event?.clientY;
-		const anchorX = fromPointer ? event.clientX : rect.left + rect.width / 2;
-		const anchorY = fromPointer ? event.clientY : rect.top;
+		const pointerEvent = event && "clientX" in event ? (event as MouseEvent | PointerEvent) : null;
+		const fromPointer = pointerEvent && pointerEvent.clientX && pointerEvent.clientY;
+		const anchorX = fromPointer ? pointerEvent.clientX : rect.left + rect.width / 2;
+		const anchorY = fromPointer ? pointerEvent.clientY : rect.top;
 		const left = clamp(anchorX - tooltipRect.width / 2, 10, window.innerWidth - tooltipRect.width - 10);
 		const aboveTop = anchorY - tooltipRect.height - 14;
 		const belowTop = rect.bottom + 12;
@@ -722,15 +776,18 @@
 
 	function wireTooltips() {
 		applyTooltipLabels();
+		const isInTooltipTarget = (related: EventTarget | null) =>
+			related instanceof Element &&
+			related.closest("[data-help], button[title], label[title], .asset[title], .rating[title]");
 		document.addEventListener("pointerover", showTooltip);
 		document.addEventListener("pointermove", positionTooltip);
 		document.addEventListener("pointerout", (event) => {
-			if (tooltipAnchor && !event.relatedTarget?.closest?.("[data-help], button[title], label[title], .asset[title], .rating[title]")) hideTooltip();
+			if (tooltipAnchor && !isInTooltipTarget(event.relatedTarget)) hideTooltip();
 		});
 		document.addEventListener("mouseover", showTooltip);
 		document.addEventListener("mousemove", positionTooltip);
 		document.addEventListener("mouseout", (event) => {
-			if (tooltipAnchor && !event.relatedTarget?.closest?.("[data-help], button[title], label[title], .asset[title], .rating[title]")) hideTooltip();
+			if (tooltipAnchor && !isInTooltipTarget(event.relatedTarget)) hideTooltip();
 		});
 		document.addEventListener("focusin", showTooltip);
 		document.addEventListener("focusout", hideTooltip);
@@ -746,16 +803,18 @@
 	}
 
 	function undoProject() {
-		if (!historyPast.length) return;
+		const previous = historyPast.pop();
+		if (!previous) return;
 		historyFuture.unshift(projectSnapshot());
-		restoreProjectSnapshot(historyPast.pop());
+		restoreProjectSnapshot(previous);
 		setStatus("Modification annulée.");
 	}
 
 	function redoProject() {
-		if (!historyFuture.length) return;
+		const next = historyFuture.shift();
+		if (!next) return;
 		historyPast.push(projectSnapshot());
-		restoreProjectSnapshot(historyFuture.shift());
+		restoreProjectSnapshot(next);
 		setStatus("Modification rétablie.");
 	}
 
@@ -763,20 +822,32 @@
 		return `layer-${Math.random().toString(36).slice(2, 9)}`;
 	}
 
-	function rect(name, x, y, w, h, fill, locked = false) {
+	function rect(name: string, x: number, y: number, w: number, h: number, fill: string, locked = false): RectObject {
 		return { id: makeId(), type: "rect", name, x, y, w, h, fill, stroke: "transparent", opacity: 1, rotation: 0, locked };
 	}
 
-	function text(name, content, x, y, w, h, fontSize, fill, align, fontFamily, rotation = 0) {
+	function text(
+		name: string,
+		content: string,
+		x: number,
+		y: number,
+		w: number,
+		h: number,
+		fontSize: number,
+		fill: string,
+		align: Align,
+		fontFamily: string,
+		rotation = 0,
+	): TextObject {
 		return { id: makeId(), type: "text", name, content, x, y, w, h, fontSize, fill, align, fontFamily, opacity: 1, rotation, locked: false, shadow: "" };
 	}
 
-	function image(name, src, x, y, w, h) {
+	function image(name: string, src: string, x: number, y: number, w: number, h: number): ImageObject {
 		void loadImage(src);
 		return { id: makeId(), type: "image", name, src, x, y, w, h, opacity: 1, rotation: 0, fit: "contain", locked: false };
 	}
 
-	function zoneCenter(zoneName, size) {
+	function zoneCenter(zoneName: ZoneKey, size: Size): Vec {
 		const zone = ZONES[zoneName];
 		return {
 			x: zone.x + (zone.w - size.w) / 2,
@@ -808,8 +879,9 @@
 		updateSelectionToolbar();
 	}
 
-	function render(targetCanvas = canvas, opts = {}) {
+	function render(targetCanvas: HTMLCanvasElement = canvas, opts: { guides?: boolean } = {}) {
 		const targetCtx = targetCanvas.getContext("2d");
+		if (!targetCtx) return;
 		const scale = targetCanvas.width / COVER.w;
 		targetCtx.clearRect(0, 0, targetCanvas.width, targetCanvas.height);
 		drawBackdrop(targetCtx, scale);
@@ -818,7 +890,7 @@
 		if (targetCanvas === canvas && selectedId) drawSelection(targetCtx, getSelected(), scale);
 	}
 
-	function drawBackdrop(targetCtx, scale) {
+	function drawBackdrop(targetCtx: CanvasRenderingContext2D, scale: number) {
 		targetCtx.save();
 		targetCtx.fillStyle = project.background;
 		targetCtx.fillRect(0, 0, COVER.w * scale, COVER.h * scale);
@@ -830,7 +902,7 @@
 		targetCtx.restore();
 	}
 
-	function drawObject(targetCtx, object, scale) {
+	function drawObject(targetCtx: CanvasRenderingContext2D, object: ProjectObject, scale: number) {
 		targetCtx.save();
 		targetCtx.globalAlpha = object.opacity ?? 1;
 		const cx = (object.x + object.w / 2) * scale;
@@ -867,7 +939,7 @@
 		targetCtx.restore();
 	}
 
-	function drawFittedImage(targetCtx, img, w, h, fit) {
+	function drawFittedImage(targetCtx: CanvasRenderingContext2D, img: HTMLImageElement, w: number, h: number, fit: Fit) {
 		const imageRatio = img.naturalWidth / img.naturalHeight;
 		const boxRatio = w / h;
 		let dw = w;
@@ -888,7 +960,7 @@
 		targetCtx.drawImage(img, dx, dy, dw, dh);
 	}
 
-	function drawText(targetCtx, object, scale) {
+	function drawText(targetCtx: CanvasRenderingContext2D, object: TextObject, scale: number) {
 		const size = object.fontSize * scale;
 		const lineHeight = size * 1.08;
 		targetCtx.fillStyle = object.fill;
@@ -909,7 +981,7 @@
 		});
 	}
 
-	function wrapText(targetCtx, textValue, maxWidth) {
+	function wrapText(targetCtx: CanvasRenderingContext2D, textValue: string, maxWidth: number) {
 		const hardLines = String(textValue).split("\n");
 		const lines = [];
 		for (const hardLine of hardLines) {
@@ -933,7 +1005,7 @@
 		return lines;
 	}
 
-	function drawGuides(targetCtx, scale) {
+	function drawGuides(targetCtx: CanvasRenderingContext2D, scale: number) {
 		targetCtx.save();
 		targetCtx.strokeStyle = "#ff3434";
 		targetCtx.lineWidth = Math.max(1, 0.35 * scale);
@@ -955,7 +1027,7 @@
 		targetCtx.restore();
 	}
 
-	function drawSelection(targetCtx, object, scale) {
+	function drawSelection(targetCtx: CanvasRenderingContext2D, object: ProjectObject | null, scale: number) {
 		if (!object) return;
 		const cx = (object.x + object.w / 2) * scale;
 		const cy = (object.y + object.h / 2) * scale;
@@ -973,6 +1045,7 @@
 		const handles = getHandles(object);
 		const top = handles.find((handle) => handle.name === "n");
 		const rotate = handles.find((handle) => handle.name === "rotate");
+		if (!top || !rotate) return;
 		targetCtx.save();
 		targetCtx.lineWidth = 2;
 		targetCtx.strokeStyle = "#fff365";
@@ -996,8 +1069,8 @@
 		targetCtx.restore();
 	}
 
-	function getHandles(object) {
-		const locals = [
+	function getHandles(object: ProjectObject): Handle[] {
+		const locals: Handle[] = [
 			{ name: "nw", x: 0, y: 0, type: "resize", cursor: "nwse-resize" },
 			{ name: "n", x: object.w / 2, y: 0, type: "resize", cursor: "ns-resize" },
 			{ name: "ne", x: object.w, y: 0, type: "resize", cursor: "nesw-resize" },
@@ -1011,10 +1084,12 @@
 		return locals.map((handle) => ({ ...handle, ...localToWorld(object, handle) }));
 	}
 
-	function loadImage(src) {
-		if (imageCache.has(src)) return Promise.resolve(imageCache.get(src));
-		if (imagePromises.has(src)) return imagePromises.get(src);
-		const promise = new Promise((resolve, reject) => {
+	function loadImage(src: string): Promise<HTMLImageElement> {
+		const cached = imageCache.get(src);
+		if (cached) return Promise.resolve(cached);
+		const pending = imagePromises.get(src);
+		if (pending) return pending;
+		const promise = new Promise<HTMLImageElement>((resolve, reject) => {
 			const img = new Image();
 			img.onload = () => {
 				imageCache.set(src, img);
@@ -1032,7 +1107,7 @@
 		return promise;
 	}
 
-	function canvasPoint(event) {
+	function canvasPoint(event: { clientX: number; clientY: number }): Vec {
 		const rect = canvas.getBoundingClientRect();
 		return {
 			x: ((event.clientX - rect.left) / rect.width) * COVER.w,
@@ -1040,21 +1115,21 @@
 		};
 	}
 
-	function degToRad(degrees) {
+	function degToRad(degrees: number) {
 		return (degrees * Math.PI) / 180;
 	}
 
-	function radToDeg(radians) {
+	function radToDeg(radians: number) {
 		return (radians * 180) / Math.PI;
 	}
 
-	function normalizeAngle(degrees) {
+	function normalizeAngle(degrees: number) {
 		let angle = ((degrees + 180) % 360) - 180;
 		if (angle < -180) angle += 360;
 		return angle;
 	}
 
-	function rotatePoint(point, angle) {
+	function rotatePoint(point: Vec, angle: number): Vec {
 		const cos = Math.cos(angle);
 		const sin = Math.sin(angle);
 		return {
@@ -1063,23 +1138,23 @@
 		};
 	}
 
-	function objectCenter(object) {
+	function objectCenter(object: { x: number; y: number; w: number; h: number }): Vec {
 		return { x: object.x + object.w / 2, y: object.y + object.h / 2 };
 	}
 
-	function localToWorld(object, local) {
+	function localToWorld(object: { x: number; y: number; w: number; h: number; rotation?: number }, local: Vec): Vec {
 		const center = objectCenter(object);
 		const rotated = rotatePoint({ x: local.x - object.w / 2, y: local.y - object.h / 2 }, degToRad(object.rotation || 0));
 		return { x: center.x + rotated.x, y: center.y + rotated.y };
 	}
 
-	function worldToLocal(point, object) {
+	function worldToLocal(point: Vec, object: { x: number; y: number; w: number; h: number; rotation?: number }): Vec {
 		const center = objectCenter(object);
 		const rotated = rotatePoint({ x: point.x - center.x, y: point.y - center.y }, -degToRad(object.rotation || 0));
 		return { x: rotated.x + object.w / 2, y: rotated.y + object.h / 2 };
 	}
 
-	function hitTest(point) {
+	function hitTest(point: Vec): ProjectObject | null {
 		for (let i = project.objects.length - 1; i >= 0; i--) {
 			const object = project.objects[i];
 			if (object.locked) continue;
@@ -1089,9 +1164,9 @@
 		return null;
 	}
 
-	function hitHandle(point) {
+	function hitHandle(point: Vec): Handle | undefined {
 		const selected = getSelected();
-		if (!selected) return null;
+		if (!selected) return undefined;
 		const threshold = 13 / currentScale;
 		return getHandles(selected).find((handle) => Math.hypot(point.x - handle.x, point.y - handle.y) < threshold);
 	}
@@ -1100,7 +1175,7 @@
 		return project.objects.find((object) => object.id === selectedId) || null;
 	}
 
-	function selectObject(id) {
+	function selectObject(id: string | null) {
 		if (id !== selectedId) resetCanvasDeleteConfirm();
 		selectedId = id;
 		updateInspector();
@@ -1112,7 +1187,7 @@
 	function openInspectorDrawerIfMobile() {
 		if (!window.matchMedia("(max-width: 900px)").matches) return;
 		if (document.body.classList.contains("is-inspector-open")) return;
-		document.querySelector("#toggleInspectorRail")?.click();
+		document.querySelector<HTMLElement>("#toggleInspectorRail")?.click();
 	}
 
 	function resetCanvasDeleteConfirm() {
@@ -1134,9 +1209,9 @@
 			selectionToolbar.hidden = true;
 			return;
 		}
-		const stage = canvas.parentElement;
-		if (!stage) return;
-		const stageRect = stage.getBoundingClientRect();
+		const parent = canvas.parentElement;
+		if (!parent) return;
+		const stageRect = parent.getBoundingClientRect();
 		const canvasRect = canvas.getBoundingClientRect();
 		if (!canvasRect.width) return;
 		const offsetLeft = canvasRect.left - stageRect.left;
@@ -1149,8 +1224,8 @@
 		selectionToolbar.dataset.kind = object.type;
 		selectionToolbar.style.left = `${left}px`;
 		selectionToolbar.style.top = `${top}px`;
-		quickColor.value = object.fill || "#ffffff";
-		quickFit.textContent = object.fit === "cover" ? "□" : "⛶";
+		quickColor.value = (object.type !== "image" && object.fill) || "#ffffff";
+		quickFit.textContent = object.type === "image" && object.fit === "cover" ? "□" : "⛶";
 	}
 
 	function selectTitleForTour() {
@@ -1161,7 +1236,7 @@
 		if (title) selectObject(title.id);
 	}
 
-	function startTourAt(index = 0) {
+	function startTourAt(index: number = 0) {
 		hideTooltip();
 		activeTourIndex = clamp(index, 0, TOUR_STEPS.length - 1);
 		tourOverlay.hidden = false;
@@ -1229,7 +1304,7 @@
 		tourCard.style.top = `${cardTop}px`;
 	}
 
-	function onCanvasDeleteClick(event) {
+	function onCanvasDeleteClick(event: Event) {
 		event.stopPropagation();
 		const object = getSelected();
 		if (!object || object.locked) return;
@@ -1260,20 +1335,20 @@
 		replaceImage.setAttribute("aria-disabled", replaceDisabled ? "true" : "false");
 		if (!object) return;
 		textContent.value = object.type === "text" ? object.content : "";
-		fontFamily.value = object.fontFamily || "Arial, sans-serif";
-		fontSize.value = object.fontSize || 8;
-		fillColor.value = object.fill || "#ffffff";
-		opacity.value = object.opacity ?? 1;
-		rotation.value = object.rotation || 0;
-		textAlign.value = object.align || "left";
-		imageFit.value = object.fit || "contain";
-		posX.value = Math.round(object.x);
-		posY.value = Math.round(object.y);
-		posW.value = Math.round(object.w);
-		posH.value = Math.round(object.h);
+		fontFamily.value = object.type === "text" ? object.fontFamily : "Arial, sans-serif";
+		fontSize.value = String(object.type === "text" ? object.fontSize : 8);
+		fillColor.value = object.type !== "image" ? object.fill : "#ffffff";
+		opacity.value = String(object.opacity ?? 1);
+		rotation.value = String(object.rotation || 0);
+		textAlign.value = object.type === "text" ? object.align : "left";
+		imageFit.value = object.type === "image" ? object.fit : "contain";
+		posX.value = String(Math.round(object.x));
+		posY.value = String(Math.round(object.y));
+		posW.value = String(Math.round(object.w));
+		posH.value = String(Math.round(object.h));
 	}
 
-	function updateSelected(mutator) {
+	function updateSelected(mutator: (object: ProjectObject) => void) {
 		const object = getSelected();
 		if (!object) return;
 		mutator(object);
@@ -1282,14 +1357,14 @@
 		scheduleRender();
 	}
 
-	function addObject(object) {
+	function addObject(object: ProjectObject) {
 		pushHistory();
 		project.objects.push(object);
 		selectObject(object.id);
 		setStatus(`${object.name} ajouté.`);
 	}
 
-	function addTextLayer(kind) {
+	function addTextLayer(kind: "title" | "body") {
 		const t = THEMES[activeTheme];
 		const size = kind === "title" ? { w: 88, h: 26 } : { w: 86, h: 36 };
 		const pos = zoneCenter(activeZone, size);
@@ -1309,7 +1384,7 @@
 		addObject(layer);
 	}
 
-	function addTextAt(point) {
+	function addTextAt(point: Vec) {
 		const t = THEMES[activeTheme];
 		const size = { w: 70, h: 26 };
 		const layer = text(
@@ -1337,13 +1412,13 @@
 		addObject(rect("Bloc couleur", pos.x, pos.y, size.w, size.h, t.secondary));
 	}
 
-	function addAsset(src, name = "Image", point = null) {
+	function addAsset(src: string, name: string = "Image", point: Vec | null = null) {
 		const size = activeZone === "spine" ? { w: 18, h: 18 } : { w: 28, h: 16 };
 		const pos = point ? { x: point.x - size.w / 2, y: point.y - size.h / 2 } : zoneCenter(activeZone, size);
 		addObject(image(name, src, clamp(pos.x, 0, COVER.w - size.w), clamp(pos.y, 0, COVER.h - size.h), size.w, size.h));
 	}
 
-	function addImportedImage(src, name = "Image importée", point = null) {
+	function addImportedImage(src: string, name: string = "Image importée", point: Vec | null = null) {
 		const zoneName = activeZone;
 		const zone = ZONES[zoneName];
 		const size = zoneName === "spine" ? { w: 24, h: 32 } : { w: Math.min(86, zone.w - 12), h: 62 };
@@ -1372,25 +1447,27 @@
 		return project.objects.filter((object) => object.x >= ZONES.front.x && !object.locked);
 	}
 
-	function isGeneratedFrontObject(object) {
+	function isGeneratedFrontObject(object: ProjectObject) {
 		return object.layoutGenerated === true || GENERATED_FRONT_LAYER_NAMES.has(object.name);
 	}
 
-	function rebuildFront(layoutKey) {
+	function rebuildFront(layoutKey: LayoutKey) {
 		const t = THEMES[activeTheme];
 		const previous = frontObjects();
+		const findText = (predicate: (object: TextObject) => boolean): TextObject | undefined =>
+			previous.find((object): object is TextObject => object.type === "text" && predicate(object));
 		const oldTitle =
-			previous.find((object) => object.type === "text" && object.name === "Titre" && isGeneratedFrontObject(object))?.content ||
-			previous.find((object) => object.type === "text" && object.fontSize >= 10)?.content ||
+			findText((object) => object.name === "Titre" && isGeneratedFrontObject(object))?.content ||
+			findText((object) => object.fontSize >= 10)?.content ||
 			"TITRE\nDU FILM";
 		const oldTagline =
-			previous.find((object) => object.type === "text" && object.name === "Accroche" && isGeneratedFrontObject(object))?.content ||
-			previous.find((object) => object.type === "text" && object.fontSize < 7)?.content ||
+			findText((object) => object.name === "Accroche" && isGeneratedFrontObject(object))?.content ||
+			findText((object) => object.fontSize < 7)?.content ||
 			"UNE NUIT, TOUT BASCULE";
 		project.objects = project.objects.filter((object, index) => index < 3 || object.x < ZONES.front.x || !isGeneratedFrontObject(object));
 
-		const created = [];
-		const add = (object) => {
+		const created: ProjectObject[] = [];
+		const add = <T extends ProjectObject>(object: T): T => {
 			created.push(object);
 			return object;
 		};
@@ -1427,10 +1504,10 @@
 		selectObject(created.find((object) => object.type === "text")?.id || null);
 	}
 
-	function applyTheme(theme) {
+	function applyTheme(theme: ThemeKey) {
 		if (theme === activeTheme) return;
 		pushHistory();
-		const [back, spine, front] = project.objects.slice(0, 3);
+		const [back, spine, front] = project.objects.slice(0, 3) as [RectObject, RectObject, RectObject];
 		const t = THEMES[theme] || THEMES.neon;
 		activeTheme = theme;
 		back.fill = t.back;
@@ -1448,34 +1525,35 @@
 			if (object.type === "rect" && object.name?.includes("Liseré")) object.fill = t.secondary;
 			if (object.type === "rect" && object.name?.includes("Bande cyan")) object.fill = t.accent;
 		});
-		document.querySelectorAll("[data-theme]").forEach((button) => {
+		document.querySelectorAll<HTMLElement>("[data-theme]").forEach((button) => {
 			button.dataset.active = String(button.dataset.theme === theme);
 		});
 		setStatus(`Ambiance ${theme}.`);
 		scheduleRender();
 	}
 
-	function applyLayout(layoutKey) {
+	function applyLayout(layoutKey: LayoutKey) {
 		if (layoutKey === activeLayout) return;
 		pushHistory();
 		activeLayout = layoutKey;
 		rebuildFront(layoutKey);
-		document.querySelectorAll("[data-layout]").forEach((button) => {
+		document.querySelectorAll<HTMLElement>("[data-layout]").forEach((button) => {
 			button.dataset.active = String(button.dataset.layout === layoutKey);
 		});
 		setStatus(`Mise en page ${layoutKey}.`);
 		scheduleRender();
 	}
 
-	function clamp(value, min, max) {
+	function clamp(value: number, min: number, max: number) {
 		return Math.min(Math.max(value, min), max);
 	}
 
-	function setStatus(message) {
-		statusbar.firstElementChild.textContent = message;
+	function setStatus(message: string) {
+		const first = statusbar.firstElementChild;
+		if (first) first.textContent = message;
 	}
 
-	function downloadBlob(blob, filename) {
+	function downloadBlob(blob: Blob, filename: string) {
 		const url = URL.createObjectURL(blob);
 		const link = document.createElement("a");
 		link.href = url;
@@ -1485,7 +1563,11 @@
 	}
 
 	async function renderExportCanvas() {
-		await Promise.all(project.objects.filter((object) => object.type === "image").map((object) => loadImage(object.src).catch(() => null)));
+		await Promise.all(
+			project.objects
+				.filter((object): object is ImageObject => object.type === "image")
+				.map((object) => loadImage(object.src).catch(() => null)),
+		);
 		const exportCanvas = document.createElement("canvas");
 		exportCanvas.width = EXPORT_W;
 		exportCanvas.height = EXPORT_H;
@@ -1516,14 +1598,14 @@
 		setStatus("PDF A4 exporté.");
 	}
 
-	function drawPdfGuides(pdf, x, y) {
+	function drawPdfGuides(pdf: jsPDF, x: number, y: number) {
 		pdf.setDrawColor(255, 52, 52);
 		pdf.setLineWidth(0.25);
 		pdf.rect(x, y, COVER.w, COVER.h);
 		pdf.setDrawColor(0, 0, 0);
 		pdf.setLineWidth(0.18);
 		const mark = 6;
-		const corners = [
+		const corners: [number, number, number, number][] = [
 			[x, y, -1, -1],
 			[x + COVER.w, y, 1, -1],
 			[x, y + COVER.h, -1, 1],
@@ -1563,27 +1645,36 @@
 			)
 			.join("");
 		assetCount.textContent = `${assets.length} logos disponibles`;
-		const wireButton = (button) => {
-			button.addEventListener("click", () => addAsset(button.dataset.src, button.title));
+		const wireButton = (button: HTMLElement) => {
+			const src = button.dataset.src ?? "";
+			button.addEventListener("click", () => addAsset(src, button.title));
 			button.addEventListener("dragstart", (event) => {
-				event.dataTransfer.setData("text/plain", button.dataset.src);
+				(event as DragEvent).dataTransfer?.setData("text/plain", src);
 			});
 		};
-		assetTray.querySelectorAll(".asset").forEach(wireButton);
-		ratingsTray.querySelectorAll(".rating").forEach(wireButton);
+		assetTray.querySelectorAll<HTMLElement>(".asset").forEach(wireButton);
+		ratingsTray.querySelectorAll<HTMLElement>(".rating").forEach(wireButton);
 	}
 
 	function wireEvents() {
-		document.querySelectorAll(".segment button").forEach((button) => {
+		document.querySelectorAll<HTMLElement>(".segment button").forEach((button) => {
 			button.addEventListener("click", () => {
-				document.querySelector(".segment .active").classList.remove("active");
+				document.querySelector(".segment .active")?.classList.remove("active");
 				button.classList.add("active");
-				activeZone = button.dataset.zone;
+				if (button.dataset.zone) activeZone = button.dataset.zone as ZoneKey;
 			});
 		});
 
-			document.querySelectorAll("[data-theme]").forEach((button) => button.addEventListener("click", () => applyTheme(button.dataset.theme)));
-			document.querySelectorAll("[data-layout]").forEach((button) => button.addEventListener("click", () => applyLayout(button.dataset.layout)));
+			document.querySelectorAll<HTMLElement>("[data-theme]").forEach((button) =>
+				button.addEventListener("click", () => {
+					if (button.dataset.theme) applyTheme(button.dataset.theme as ThemeKey);
+				}),
+			);
+			document.querySelectorAll<HTMLElement>("[data-layout]").forEach((button) =>
+				button.addEventListener("click", () => {
+					if (button.dataset.layout) applyLayout(button.dataset.layout as LayoutKey);
+				}),
+			);
 			undoAction.addEventListener("click", undoProject);
 			redoAction.addEventListener("click", redoProject);
 			undoActionStage.addEventListener("click", undoProject);
@@ -1597,7 +1688,7 @@
 		addTextButton.addEventListener("click", () => addTextLayer("body"));
 		addBox.addEventListener("click", addRect);
 		imageUploadButton.addEventListener("click", openImageUploadPicker);
-			imageUpload.addEventListener("change", (event) => handleFiles(event.target.files));
+			imageUpload.addEventListener("change", (event) => handleFiles((event.target as HTMLInputElement).files));
 			toggleGuides.addEventListener("change", () => {
 				pushHistory();
 				showGuides = toggleGuides.checked;
@@ -1678,19 +1769,20 @@
 	}
 
 	function wireMobileChrome() {
-		const menuToggle = document.querySelector("#topbarMenu");
-		const toolsToggle = document.querySelector("#toggleToolsRail");
-		const inspectorToggle = document.querySelector("#toggleInspectorRail");
-		const backdrop = document.querySelector("#mobileBackdrop");
+		const menuToggle = document.querySelector<HTMLElement>("#topbarMenu");
+		const toolsToggle = document.querySelector<HTMLElement>("#toggleToolsRail");
+		const inspectorToggle = document.querySelector<HTMLElement>("#toggleInspectorRail");
+		const backdrop = document.querySelector<HTMLElement>("#mobileBackdrop");
 		const body = document.body;
 
-		const states = {
+		type ChromeKey = "menu" | "tools" | "inspector";
+		const states: Record<ChromeKey, { className: string; toggle: HTMLElement | null; attr: string }> = {
 			menu: { className: "is-menu-open", toggle: menuToggle, attr: "aria-expanded" },
 			tools: { className: "is-tools-open", toggle: toolsToggle, attr: "aria-pressed" },
 			inspector: { className: "is-inspector-open", toggle: inspectorToggle, attr: "aria-pressed" },
 		};
 
-		function closeAll(except) {
+		function closeAll(except: ChromeKey | null) {
 			for (const [key, state] of Object.entries(states)) {
 				if (key === except) continue;
 				body.classList.remove(state.className);
@@ -1698,7 +1790,7 @@
 			}
 		}
 
-		function toggle(key) {
+		function toggle(key: ChromeKey) {
 			const state = states[key];
 			if (!state || !state.toggle) return;
 			const willOpen = !body.classList.contains(state.className);
@@ -1713,7 +1805,7 @@
 		backdrop?.addEventListener("click", () => closeAll(null));
 
 		document.querySelector(".rail--left")?.addEventListener("click", (event) => {
-			if (event.target.closest("button, label, input, select, textarea, .asset, .rating")) {
+			if (event.target instanceof Element && event.target.closest("button, label, input, select, textarea, .asset, .rating")) {
 				body.classList.remove(states.tools.className);
 				toolsToggle?.setAttribute(states.tools.attr, "false");
 			}
@@ -1733,13 +1825,14 @@
 		desktopQuery.addEventListener?.("change", handleViewport);
 	}
 
-	function onPointerDown(event) {
+	function onPointerDown(event: PointerEvent) {
 		resetCanvasDeleteConfirm();
 		canvas.setPointerCapture(event.pointerId);
 		const point = canvasPoint(event);
 		const handle = hitHandle(point);
 		if (handle) {
 			const object = getSelected();
+			if (!object || !selectedId) return;
 			const center = objectCenter(object);
 			pointerMode = handle.type;
 			dragState = {
@@ -1747,7 +1840,7 @@
 				handle: handle.name,
 				start: point,
 				startAngle: Math.atan2(point.y - center.y, point.x - center.x),
-				original: { ...object },
+				original: structuredClone(object),
 				historyPushed: false,
 			};
 			return;
@@ -1760,7 +1853,7 @@
 		}
 	}
 
-	function onPointerMove(event) {
+	function onPointerMove(event: PointerEvent) {
 		const point = canvasPoint(event);
 		if (!pointerMode || !dragState) {
 			const handle = hitHandle(point);
@@ -1773,19 +1866,19 @@
 			pushHistory();
 			dragState.historyPushed = true;
 		}
-		if (pointerMode === "move") {
+		if (pointerMode === "move" && "dx" in dragState) {
 			object.x = clamp(point.x - dragState.dx, -object.w + 4, COVER.w - 4);
 			object.y = clamp(point.y - dragState.dy, -object.h + 4, COVER.h - 4);
 		}
-		if (pointerMode === "resize") resizeObject(object, point, dragState);
-		if (pointerMode === "rotate") rotateObject(object, point, dragState, event.shiftKey);
+		if (pointerMode === "resize" && "handle" in dragState) resizeObject(object, point, dragState);
+		if (pointerMode === "rotate" && "startAngle" in dragState) rotateObject(object, point, dragState, event.shiftKey);
 		updateInspector();
 		updateCanvasDeleteButton();
 		updateSelectionToolbar();
 		scheduleRender();
 	}
 
-	function onPointerUp(event) {
+	function onPointerUp(event: PointerEvent) {
 		try {
 			canvas.releasePointerCapture(event.pointerId);
 		} catch (_) {
@@ -1795,7 +1888,7 @@
 		dragState = null;
 	}
 
-	function resizeObject(object, point, state) {
+	function resizeObject(object: ProjectObject, point: Vec, state: ResizeRotateDrag) {
 		const original = state.original;
 		const min = 5;
 		const local = worldToLocal(point, original);
@@ -1829,7 +1922,7 @@
 		object.rotation = original.rotation;
 	}
 
-	function fixedAnchorForHandle(handle, object) {
+	function fixedAnchorForHandle(handle: string, object: { w: number; h: number }): { originalLocal: Vec; nextLocal: (w: number, h: number) => Vec } {
 		if (handle === "n") return { originalLocal: { x: object.w / 2, y: object.h }, nextLocal: (w, h) => ({ x: w / 2, y: h }) };
 		if (handle === "s") return { originalLocal: { x: object.w / 2, y: 0 }, nextLocal: (w) => ({ x: w / 2, y: 0 }) };
 		if (handle === "e") return { originalLocal: { x: 0, y: object.h / 2 }, nextLocal: (_w, h) => ({ x: 0, y: h / 2 }) };
@@ -1840,7 +1933,7 @@
 		return { originalLocal: { x: object.w, y: 0 }, nextLocal: (w) => ({ x: w, y: 0 }) };
 	}
 
-	function rotateObject(object, point, state, snap) {
+	function rotateObject(object: ProjectObject, point: Vec, state: ResizeRotateDrag, snap: boolean) {
 		const original = state.original;
 		const center = objectCenter(original);
 		const currentAngle = Math.atan2(point.y - center.y, point.x - center.x);
@@ -1849,18 +1942,18 @@
 		object.rotation = next;
 	}
 
-	function onDrop(event) {
+	function onDrop(event: DragEvent) {
 		event.preventDefault();
 		const point = canvasPoint(event);
-		if (event.dataTransfer.files?.length) {
+		if (event.dataTransfer?.files?.length) {
 			handleFiles(event.dataTransfer.files, point);
 			return;
 		}
-		const src = event.dataTransfer.getData("text/plain");
+		const src = event.dataTransfer?.getData("text/plain");
 		if (src) addAsset(src, "Logo", point);
 	}
 
-	function handleFiles(files, point = null) {
+	function handleFiles(files: FileList | null, point: Vec | null = null) {
 		const list = Array.from(files || []);
 		const accepted = list.filter((file) => file.type === "image/jpeg" || file.type === "image/png" || /\.(jpe?g|png)$/i.test(file.name));
 		const rejected = list.length - accepted.length;
@@ -1870,6 +1963,7 @@
 		accepted.forEach((file) => {
 			const reader = new FileReader();
 			reader.onload = () => {
+				if (typeof reader.result !== "string") return;
 				addImportedImage(reader.result, file.name.replace(/\.[^.]+$/, ""), point);
 				setStatus(`Image « ${file.name} » ajoutée.`);
 			};
@@ -1892,7 +1986,7 @@
 	function applyQuickColor() {
 		prepareInspectorEdit();
 		updateSelected((object) => {
-			object.fill = quickColor.value;
+			if (object.type !== "image") object.fill = quickColor.value;
 		});
 	}
 
@@ -1900,7 +1994,7 @@
 		const object = getSelected();
 		if (!object || object.type !== "text") return;
 		pushHistory();
-		const options = ["left", "center", "right"];
+		const options: Align[] = ["left", "center", "right"];
 		object.align = options[(options.indexOf(object.align || "left") + 1) % options.length];
 		updateInspector();
 		updateSelectionToolbar();
@@ -1925,10 +2019,11 @@
 				object.content = textContent.value;
 				object.fontFamily = fontFamily.value;
 				object.fontSize = Number(fontSize.value);
-				object.align = textAlign.value;
+				object.align = textAlign.value as Align;
+				object.fill = fillColor.value;
 			}
-			if (object.type === "image") object.fit = imageFit.value;
-			object.fill = fillColor.value;
+			if (object.type === "image") object.fit = imageFit.value as Fit;
+			if (object.type === "rect") object.fill = fillColor.value;
 			object.opacity = Number(opacity.value);
 			object.rotation = Number(rotation.value);
 			object.x = Number(posX.value);
@@ -1945,13 +2040,15 @@
 		replaceImageInput.click();
 	}
 
-	function replaceSelectedImage(event) {
+	function replaceSelectedImage(event: Event) {
+		const input = event.target as HTMLInputElement;
 		const object = getSelected();
-		const file = event.target.files?.[0];
+		const file = input.files?.[0];
 		if (!object || object.type !== "image" || !file) return;
 		pushHistory();
 		const reader = new FileReader();
 		reader.onload = () => {
+			if (typeof reader.result !== "string") return;
 			object.src = reader.result;
 			object.name = file.name.replace(/\.[^.]+$/, "");
 			void loadImage(object.src);
@@ -1961,10 +2058,10 @@
 			setStatus("Image remplacée.");
 		};
 		reader.readAsDataURL(file);
-		event.target.value = "";
+		input.value = "";
 	}
 
-	function moveLayer(direction) {
+	function moveLayer(direction: number) {
 		const index = project.objects.findIndex((object) => object.id === selectedId);
 		const next = index + direction;
 		if (index < 3 || next < 3 || next >= project.objects.length) return;
@@ -1997,7 +2094,7 @@
 		selectObject(null);
 	}
 
-	function onKeyDown(event) {
+	function onKeyDown(event: KeyboardEvent) {
 		if (activeTourIndex >= 0) {
 			if (event.key === "Escape") {
 				event.preventDefault();
@@ -2015,7 +2112,8 @@
 				return;
 			}
 		}
-		if (["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement.tagName)) return;
+		const focusedTag = document.activeElement?.tagName ?? "";
+		if (["INPUT", "TEXTAREA", "SELECT"].includes(focusedTag)) return;
 		if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "z") {
 			event.preventDefault();
 			if (event.shiftKey) redoProject();
@@ -2034,88 +2132,95 @@
 		downloadBlob(new Blob([payload], { type: "application/json" }), "vhs-studio-project.json");
 	}
 
-	function cleanString(value, fallback = "", maxLength = 4000) {
+	function cleanString(value: unknown, fallback = "", maxLength = 4000) {
 		return typeof value === "string" ? value.slice(0, maxLength) : fallback;
 	}
 
-	function cleanNumber(value, fallback, min, max) {
+	function cleanNumber(value: unknown, fallback: number, min: number, max: number) {
 		const number = Number(value);
 		return Number.isFinite(number) ? clamp(number, min, max) : fallback;
 	}
 
-	function cleanColor(value, fallback = "#ffffff") {
+	function cleanColor(value: unknown, fallback = "#ffffff") {
 		return typeof value === "string" && /^#[0-9a-f]{6}$/i.test(value) ? value : fallback;
 	}
 
-	function cleanStroke(value) {
+	function cleanStroke(value: unknown) {
 		if (value === "transparent") return value;
 		return cleanColor(value, "transparent");
 	}
 
-	function cleanImageSource(value) {
+	function cleanImageSource(value: unknown): string | null {
 		if (typeof value !== "string") return null;
 		if (value.startsWith("/") || /^data:image\/(?:png|jpe?g);base64,/i.test(value)) return value;
 		return null;
 	}
 
-	function normalizeProjectObject(raw, seenIds) {
+	function normalizeProjectObject(raw: unknown, seenIds: Set<string>): ProjectObject | null {
 		if (!raw || typeof raw !== "object") return null;
-		if (!["rect", "text", "image"].includes(raw.type)) return null;
+		const r = raw as Record<string, unknown>;
+		if (typeof r.type !== "string" || !["rect", "text", "image"].includes(r.type)) return null;
 
-		const rawId = cleanString(raw.id, "", 80);
+		const rawId = cleanString(r.id, "", 80);
 		const id = rawId && !seenIds.has(rawId) ? rawId : makeId();
 		seenIds.add(id);
 
-		const base = {
+		const base: BaseObject = {
 			id,
-			type: raw.type,
-			name: cleanString(raw.name, "Calque", 80),
-			x: cleanNumber(raw.x, 0, -COVER.w, COVER.w * 2),
-			y: cleanNumber(raw.y, 0, -COVER.h, COVER.h * 2),
-			w: cleanNumber(raw.w, 20, 2, COVER.w * 2),
-			h: cleanNumber(raw.h, 20, 2, COVER.h * 2),
-			opacity: cleanNumber(raw.opacity, 1, 0, 1),
-			rotation: cleanNumber(raw.rotation, 0, -180, 180),
-			locked: raw.locked === true,
+			name: cleanString(r.name, "Calque", 80),
+			x: cleanNumber(r.x, 0, -COVER.w, COVER.w * 2),
+			y: cleanNumber(r.y, 0, -COVER.h, COVER.h * 2),
+			w: cleanNumber(r.w, 20, 2, COVER.w * 2),
+			h: cleanNumber(r.h, 20, 2, COVER.h * 2),
+			opacity: cleanNumber(r.opacity, 1, 0, 1),
+			rotation: cleanNumber(r.rotation, 0, -180, 180),
+			locked: r.locked === true,
 		};
-		if (raw.layoutGenerated === true) base.layoutGenerated = true;
+		if (r.layoutGenerated === true) base.layoutGenerated = true;
 
-		if (raw.type === "rect") {
+		if (r.type === "rect") {
 			return {
 				...base,
-				fill: cleanColor(raw.fill, "#000000"),
-				stroke: cleanStroke(raw.stroke),
+				type: "rect",
+				fill: cleanColor(r.fill, "#000000"),
+				stroke: cleanStroke(r.stroke),
 			};
 		}
 
-		if (raw.type === "text") {
+		if (r.type === "text") {
+			const align: Align = r.align === "center" || r.align === "right" || r.align === "left" ? r.align : "left";
 			return {
 				...base,
-				content: cleanString(raw.content, "", 6000),
-				fontSize: cleanNumber(raw.fontSize, 8, 2, 180),
-				fill: cleanColor(raw.fill, "#ffffff"),
-				align: ["left", "center", "right"].includes(raw.align) ? raw.align : "left",
-				fontFamily: cleanString(raw.fontFamily, "Arial, sans-serif", 180),
-				shadow: cleanString(raw.shadow, "", 120),
+				type: "text",
+				content: cleanString(r.content, "", 6000),
+				fontSize: cleanNumber(r.fontSize, 8, 2, 180),
+				fill: cleanColor(r.fill, "#ffffff"),
+				align,
+				fontFamily: cleanString(r.fontFamily, "Arial, sans-serif", 180),
+				shadow: cleanString(r.shadow, "", 120),
 			};
 		}
 
-		const src = cleanImageSource(raw.src);
+		const src = cleanImageSource(r.src);
 		if (!src) return null;
 		return {
 			...base,
+			type: "image",
 			src,
-			fit: raw.fit === "cover" ? "cover" : "contain",
+			fit: r.fit === "cover" ? "cover" : "contain",
 		};
 	}
 
-	function normalizeProjectObjects(objects) {
-		const seenIds = new Set();
-		return objects.map((object) => normalizeProjectObject(object, seenIds)).filter(Boolean);
+	function normalizeProjectObjects(objects: unknown[]): ProjectObject[] {
+		const seenIds = new Set<string>();
+		return objects
+			.map((object) => normalizeProjectObject(object, seenIds))
+			.filter((object): object is ProjectObject => object !== null);
 	}
 
-	function loadProjectFile(event) {
-		const file = event.target.files?.[0];
+	function loadProjectFile(event: Event) {
+		const input = event.target as HTMLInputElement;
+		const file = input.files?.[0];
 		if (!file) return;
 		const reader = new FileReader();
 		reader.onload = () => {
@@ -2128,7 +2233,9 @@
 				project.name = data.name || project.name;
 				project.background = cleanColor(data.background, project.background);
 				project.objects = objects;
-				project.objects.filter((object) => object.type === "image").forEach((object) => void loadImage(object.src));
+				project.objects
+				.filter((object): object is ImageObject => object.type === "image")
+				.forEach((object) => void loadImage(object.src));
 				selectObject(null);
 				setStatus("Projet chargé.");
 				scheduleRender();
