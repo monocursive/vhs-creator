@@ -1,0 +1,40 @@
+---
+---
+
+<header class="topbar">
+	<div class="brand" aria-label="VHS Studio">
+		<span class="brand__logo">VHS STUDIO</span>
+		<span class="brand__sub">REC ●</span>
+	</div>
+	<a
+		class="topbar__festival"
+		id="contestLink"
+		href="https://boskop.org/appel-a-jaquettes-vhs-2026/"
+		target="_blank"
+		rel="noopener noreferrer"
+	>
+		<small>Concours 2026</small>
+		<strong>CONTRE-FICTIONS · BOSKOP · LES INTERGALACTIQUES</strong>
+		<span class="topbar__festival-action">Déposer sa jaquette ↗</span>
+	</a>
+	<div class="topbar__spacer"></div>
+	<div class="topbar__actions" id="topbarActions">
+		<button class="topbar__action topbar__action--secondary history-action" id="undoAction" type="button" title="Annuler (⌘Z)" disabled>↶ Annuler</button>
+		<button class="topbar__action topbar__action--secondary history-action" id="redoAction" type="button" title="Refaire (⇧⌘Z)" disabled>↷ Refaire</button>
+		<button class="topbar__action topbar__action--secondary" id="startTour" type="button">Guide</button>
+		<button class="topbar__action topbar__action--secondary" id="saveProject" type="button">Sauver</button>
+		<label class="topbar__action topbar__action--secondary file-action">
+			Charger
+			<input id="loadProject" type="file" accept="application/json" />
+		</label>
+		<label class="topbar__action topbar__action--secondary guide-toggle">
+			<input id="toggleGuides" type="checkbox" checked />
+			Repères
+		</label>
+		<button class="topbar__action" id="exportPng" type="button">↓ PNG</button>
+		<button class="topbar__action topbar__action--primary" id="exportPdf" type="button">↓ PDF impression</button>
+	</div>
+	<button class="topbar__menu-toggle" id="topbarMenu" type="button" aria-label="Menu" aria-expanded="false">
+		<span></span><span></span><span></span>
+	</button>
+</header>

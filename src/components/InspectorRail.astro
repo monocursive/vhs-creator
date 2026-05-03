@@ -1,0 +1,123 @@
+---
+---
+
+<aside class="rail rail--right" aria-label="Inspecteur">
+	<div class="section">
+		<div class="section__head"><span class="section__dot"></span><span class="section__title">Inspecteur</span></div>
+		<div class="selected-row">
+			<span>Calque</span>
+			<strong id="selectedLabel">aucun</strong>
+		</div>
+	</div>
+
+	<div class="section inspector" id="inspector">
+		<div class="inspector-primary-note">
+			Les réglages rapides apparaissent au-dessus de l'élément sélectionné.
+		</div>
+		<div class="field">
+			<label class="label" for="textContent">Contenu</label>
+			<textarea class="textarea" id="textContent" rows="4"></textarea>
+		</div>
+		<div class="field">
+			<label class="label" for="fontFamily">Police</label>
+			<select class="input" id="fontFamily">
+				<optgroup label="Kit BosKop / local">
+					<option value="SF Movie Poster Condensed, Impact, sans-serif">SF Movie Poster Condensed</option>
+					<option value="SF Movie Poster, Impact, sans-serif">SF Movie Poster</option>
+					<option value="Bee Two, Georgia, serif">Bee Two</option>
+				</optgroup>
+				<optgroup label="Titres VHS / SF">
+					<option value="Michroma, Eurostile, sans-serif">Michroma</option>
+					<option value="Orbitron, Eurostile, sans-serif">Orbitron</option>
+					<option value="Audiowide, Eurostile, sans-serif">Audiowide</option>
+					<option value="Bungee Shade, Impact, sans-serif">Bungee Shade</option>
+					<option value="Bungee, Impact, sans-serif">Bungee</option>
+					<option value="Monoton, Impact, sans-serif">Monoton</option>
+					<option value="Creepster, Georgia, serif">Creepster</option>
+					<option value="Anton, Impact, sans-serif">Anton</option>
+					<option value="Bebas Neue, Impact, sans-serif">Bebas Neue</option>
+					<option value="Archivo Black, Impact, sans-serif">Archivo Black</option>
+					<option value="Iceland, Michroma, Eurostile, sans-serif">Iceland (Alien)</option>
+				</optgroup>
+				<optgroup label="Titres aventure / romance">
+					<option value="Cinzel, Bee Two, Georgia, serif">Cinzel</option>
+					<option value="Playfair Display, Bee Two, Georgia, serif">Playfair Display</option>
+				</optgroup>
+				<optgroup label="Textes / crédits">
+					<option value="VT323, Courier New, monospace">VT323</option>
+					<option value="Roboto Condensed, Arial Narrow, sans-serif">Roboto Condensed</option>
+					<option value="Oswald, Arial Narrow, sans-serif">Oswald</option>
+					<option value="Special Elite, Courier New, monospace">Special Elite</option>
+					<option value="Courier Prime, Courier New, monospace">Courier Prime</option>
+					<option value="Georgia, serif">Georgia</option>
+					<option value="Arial, sans-serif">Arial</option>
+				</optgroup>
+			</select>
+		</div>
+		<div class="slider-row">
+			<label for="fontSize">Taille</label>
+			<input id="fontSize" type="range" min="2" max="34" step="0.5" />
+		</div>
+		<div class="split">
+			<div class="field">
+				<label class="label" for="fillColor">Couleur</label>
+				<input id="fillColor" type="color" />
+			</div>
+			<div class="field">
+				<label class="label" for="opacity">Opacité</label>
+				<input id="opacity" type="range" min="0.1" max="1" step="0.05" />
+			</div>
+		</div>
+		<div class="slider-row">
+			<label for="rotation">Rotation</label>
+			<input id="rotation" type="range" min="-180" max="180" step="1" />
+		</div>
+		<div class="split">
+			<div class="field">
+				<label class="label" for="textAlign">Alignement</label>
+				<select class="input" id="textAlign">
+					<option value="left">Gauche</option>
+					<option value="center">Centre</option>
+					<option value="right">Droite</option>
+				</select>
+			</div>
+			<div class="field image-controls">
+				<label class="label" for="imageFit">Image</label>
+				<select class="input" id="imageFit">
+					<option value="contain">Tout voir</option>
+					<option value="cover">Remplir</option>
+				</select>
+			</div>
+		</div>
+		<button class="btn btn--ghost image-controls file-action" id="replaceImage" type="button">
+			↥ Remplacer l'image
+		</button>
+		<input class="file-input-hidden" id="replaceImageInput" type="file" accept="image/jpeg,image/png,.jpg,.jpeg,.png" />
+		<details class="advanced-controls">
+			<summary>Réglages avancés</summary>
+			<div class="position-grid">
+				<label>X <input id="posX" type="number" step="1" /></label>
+				<label>Y <input id="posY" type="number" step="1" /></label>
+				<label>L <input id="posW" type="number" step="1" /></label>
+				<label>H <input id="posH" type="number" step="1" /></label>
+			</div>
+			<div class="layer-actions">
+				<button class="btn" id="bringForward" type="button">▲ Monter</button>
+				<button class="btn" id="sendBackward" type="button">▼ Descendre</button>
+				<button class="btn" id="duplicateLayer" type="button">⎘ Dupliquer</button>
+				<button class="btn btn--danger" id="deleteLayer" type="button">✕ Supprimer</button>
+			</div>
+		</details>
+	</div>
+
+	<div class="section">
+		<div class="section__head"><span class="section__dot"></span><span class="section__title">Aide</span></div>
+		<ul class="help-list">
+			<li><b>Cliquer</b> un élément pour le sélectionner</li>
+			<li><b>Double-cliquer</b> un texte pour le modifier</li>
+			<li>Glisser pour <b>déplacer</b>, coins pour <b>redimensionner</b></li>
+			<li>Pastille jaune au-dessus pour <b>tourner</b></li>
+			<li><b>⌘D</b> dupliquer · <b>⌫</b> supprimer</li>
+		</ul>
+	</div>
+</aside>

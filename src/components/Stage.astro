@@ -1,0 +1,64 @@
+---
+---
+
+<main class="stage-shell" aria-label="Zone de création">
+	<div class="stage__topbar">
+		<button class="stage__rail-toggle stage__rail-toggle--left" id="toggleToolsRail" type="button" aria-label="Outils" aria-pressed="false">
+			<span class="stage__rail-icon" aria-hidden="true">▤</span>
+			<span class="stage__rail-text">Outils</span>
+		</button>
+		<div class="stage__history" aria-label="Historique">
+			<button id="undoActionStage" type="button" title="Annuler (⌘Z)" disabled>↶</button>
+			<button id="redoActionStage" type="button" title="Refaire (⇧⌘Z)" disabled>↷</button>
+		</div>
+		<button class="stage__tour-button" id="startTourStage" type="button" title="Guide rapide">?</button>
+		<a
+			class="stage__contest-link"
+			id="contestLinkStage"
+			href="https://boskop.org/appel-a-jaquettes-vhs-2026/"
+			target="_blank"
+			rel="noopener noreferrer"
+		>
+			<span>Concours</span>
+			<strong>Déposer</strong>
+		</a>
+		<div class="segment" role="group" aria-label="Zone cible">
+			<button class="active" data-zone="front" type="button">Recto</button>
+			<button data-zone="back" type="button">Verso</button>
+			<button data-zone="spine" type="button">Tranche</button>
+		</div>
+		<div class="stage__hint">Cliquez un élément · glissez les coins pour redimensionner · double-clic pour éditer le texte</div>
+		<button class="stage__rail-toggle stage__rail-toggle--right" id="toggleInspectorRail" type="button" aria-label="Calques" aria-pressed="false">
+			<span class="stage__rail-icon" aria-hidden="true">⚙</span>
+			<span class="stage__rail-text">Calques</span>
+		</button>
+	</div>
+	<div class="stage-scroller" id="stageScroller">
+		<div class="canvas-stage" id="dropStage">
+			<canvas id="coverCanvas" aria-label="Prévisualisation de la jaquette VHS"></canvas>
+			<div class="selection-toolbar" id="selectionToolbar" hidden>
+				<button class="selection-toolbar__button text-controls" id="quickAlign" type="button" title="Alignement">≡</button>
+				<label class="selection-toolbar__swatch color-controls" title="Couleur">
+					<input id="quickColor" type="color" />
+				</label>
+				<button class="selection-toolbar__button image-controls" id="quickFit" type="button" title="Remplir / tout voir">⛶</button>
+				<span class="selection-toolbar__divider"></span>
+				<button class="selection-toolbar__button" id="quickBackward" type="button" title="Reculer">▼</button>
+				<button class="selection-toolbar__button" id="quickForward" type="button" title="Avancer">▲</button>
+				<button class="selection-toolbar__button" id="quickDuplicate" type="button" title="Dupliquer">⎘</button>
+				<button class="selection-toolbar__button selection-toolbar__button--danger" id="quickDelete" type="button" title="Supprimer">✕</button>
+			</div>
+			<button class="canvas-delete" id="canvasDelete" type="button" aria-label="Supprimer l'élément" hidden>
+				<span class="canvas-delete__icon" aria-hidden="true">✕</span>
+				<span class="canvas-delete__confirm">Confirmer ?</span>
+			</button>
+		</div>
+	</div>
+	<div class="stage__zoom">
+		<button id="fitZoom" type="button" title="Ajuster à l'écran">⤢ Ajuster</button>
+	</div>
+	<div class="statusbar" id="statusbar">
+		<span>Sélectionne un élément : déplacer au doigt/souris, poignées pour redimensionner, pastille jaune pour tourner.</span>
+		<span>258 x 194 mm · verso 114 mm · tranche 30 mm · recto 114 mm</span>
+	</div>
+</main>
